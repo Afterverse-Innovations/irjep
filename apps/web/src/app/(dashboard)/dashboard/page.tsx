@@ -8,6 +8,8 @@ import { ArrowRight } from "lucide-react";
 
 export default function DashboardPage() {
     const user = useQuery(api.users.viewer);
+    const submissions = useQuery(api.submissions.getMySubmissions);
+    const pending = useQuery(api.submissions.getPendingSubmissions);
 
     return (
         <div className="space-y-8">
@@ -17,26 +19,30 @@ export default function DashboardPage() {
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <Card className="bg-white border-stone-200 shadow-sm">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-stone-500">My Submissions</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-stone-900">0</div> {/* Fetch real count later */}
-                        <p className="text-xs text-stone-400 mt-1">Lifetime submissions</p>
-                    </CardContent>
-                </Card>
-
-                {user?.role === "editor" && (
-                    <Card className="bg-white border-stone-200 shadow-sm">
+                <Link href="/dashboard/submissions" className="block cursor-pointer">
+                    <Card className="bg-white border-stone-200 shadow-sm hover:border-primary/20 transition-colors">
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-stone-500">Pending Reviews</CardTitle>
+                            <CardTitle className="text-sm font-medium text-stone-500">My Submissions</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-amber-600">0</div>
-                            <p className="text-xs text-stone-400 mt-1">Require attention</p>
+                            <div className="text-2xl font-bold text-stone-900">{submissions?.length ?? 0}</div>
+                            <p className="text-xs text-stone-400 mt-1">Lifetime submissions</p>
                         </CardContent>
                     </Card>
+                </Link>
+
+                {(user?.role === "editor" || user?.role === "admin") && (
+                    <Link href="/dashboard/queue" className="block cursor-pointer">
+                        <Card className="bg-white border-stone-200 shadow-sm hover:border-amber-200 transition-colors">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-medium text-stone-500">Pending Reviews</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold text-amber-600">{pending?.length ?? 0}</div>
+                                <p className="text-xs text-stone-400 mt-1">Require attention</p>
+                            </CardContent>
+                        </Card>
+                    </Link>
                 )}
             </div>
 
