@@ -102,9 +102,9 @@ function LatestArticlesSection() {
                                     {article.abstract}
                                 </p>
                                 <div className="flex items-center text-xs text-stone-400 gap-4">
-                                    <span>ID: {article.authorId}</span>
+                                    <span className="font-medium text-stone-600">By {article.authors?.join(", ")}</span>
                                     <span>•</span>
-                                    <span>Published {new Date(article.updatedAt).toLocaleDateString()}</span>
+                                    <span>Published {new Date(article.publishDate || article._creationTime).toLocaleDateString()}</span>
                                 </div>
                             </div>
                         ))

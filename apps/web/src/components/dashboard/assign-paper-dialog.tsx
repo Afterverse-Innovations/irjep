@@ -24,6 +24,10 @@ interface AssignPaperDialogProps {
 
 export function AssignPaperDialog({ issueId, isOpen, onClose }: AssignPaperDialogProps) {
     const [view, setView] = useState<"available" | "assigned">("available");
+    const [editingSubId, setEditingSubId] = useState<string | null>(null);
+    const [pageRange, setPageRange] = useState("");
+    const [doi, setDoi] = useState("");
+
     const acceptedSubmissions = useQuery(api.submissions.getAcceptedSubmissions);
     const assignedArticles = useQuery(api.articles.getArticlesByIssue, { issueId: issueId as any });
 
@@ -37,8 +41,13 @@ export function AssignPaperDialog({ issueId, isOpen, onClose }: AssignPaperDialo
             await assignToIssue({
                 submissionId,
                 issueId: issueId as any,
+                pageRange: pageRange || undefined,
+                doi: doi || undefined,
             });
             toast.success("Paper assigned to issue");
+            setEditingSubId(null);
+            setPageRange("");
+            setDoi("");
         } catch (error) {
             toast.error("Failed to assign paper");
         } finally {
@@ -94,14 +103,44 @@ export function AssignPaperDialog({ issueId, isOpen, onClose }: AssignPaperDialo
                             </div>
                         ) : (
                             acceptedSubmissions.map((sub: any) => (
-                                <div key={sub._id} className="flex items-center justify-between p-4 border border-stone-100 rounded-xl hover:bg-stone-50 transition-colors">
-                                    <div className="flex-1 mr-4">
-                                        <h4 className="font-medium text-stone-900 line-clamp-1">{sub.title}</h4>
-                                        <p className="text-xs text-stone-500 mt-1 uppercase tracking-wider">Accepted</p>
+                                <div key={sub._id} className="p-4 border border-stone-100 rounded-xl hover:bg-stone-50 transition-colors">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex-1 mr-4">
+                                            <h4 className="font-medium text-stone-900 line-clamp-1">{sub.title}</h4>
+                                            <p className="text-xs text-stone-500 mt-1 uppercase tracking-wider font-bold">Accepted</p>
+                                        </div>
+                                        <Button size="sm" variant={editingSubId === sub._id ? "ghost" : "default"} onClick={() => setEditingSubId(editingSubId === sub._id ? null : sub._id)}>
+                                            {editingSubId === sub._id ? "Cancel" : "Assign"}
+                                        </Button>
                                     </div>
-                                    <Button size="sm" onClick={() => handleAssign(sub._id)} disabled={isLoading}>
-                                        Assign
-                                    </Button>
+
+                                    {editingSubId === sub._id && (
+                                        <div className="space-y-3 bg-stone-100/50 p-4 rounded-lg mt-2 animate-in fade-in slide-in-from-top-2">
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div>
+                                                    <label className="text-[10px] font-bold uppercase text-stone-500 mb-1 block">Page Range</label>
+                                                    <Input
+                                                        placeholder="e.g. 1-12"
+                                                        className="h-8 text-xs bg-white"
+                                                        value={pageRange}
+                                                        onChange={(e) => setPageRange(e.target.value)}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-[10px] font-bold uppercase text-stone-500 mb-1 block">DOI (Optional)</label>
+                                                    <Input
+                                                        placeholder="10.xxxx/xxxx"
+                                                        className="h-8 text-xs bg-white"
+                                                        value={doi}
+                                                        onChange={(e) => setDoi(e.target.value)}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <Button className="w-full h-8 text-xs" onClick={() => handleAssign(sub._id)} disabled={isLoading}>
+                                                Confirm Assignment
+                                            </Button>
+                                        </div>
+                                    )}
                                 </div>
                             ))
                         )
@@ -118,15 +157,20 @@ export function AssignPaperDialog({ issueId, isOpen, onClose }: AssignPaperDialo
                                 <div key={article._id} className="flex items-center justify-between p-4 border border-emerald-100 bg-emerald-50/20 rounded-xl">
                                     <div className="flex-1 mr-4">
                                         <h4 className="font-medium text-stone-900 line-clamp-1">{article.title}</h4>
-                                        <div className="flex gap-2 mt-1">
-                                            {article.authors.map((a: string) => (
-                                                <span key={a} className="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded uppercase font-bold tracking-tighter">
-                                                    {a}
-                                                </span>
-                                            ))}
+                                        <div className="flex items-center gap-3 mt-1">
+                                            <div className="flex gap-1">
+                                                {article.authors.map((a: string) => (
+                                                    <span key={a} className="text-[9px] text-emerald-700 bg-emerald-100/50 px-1 py-0.5 rounded uppercase font-bold tracking-tighter">
+                                                        {a}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                            {article.pageRange && (
+                                                <span className="text-[9px] text-stone-400 font-mono">pp. {article.pageRange}</span>
+                                            )}
                                         </div>
                                     </div>
-                                    <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-100" onClick={() => handleRemove(article._id)} disabled={isLoading}>
+                                    <Button size="sm" variant="ghost" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => handleRemove(article._id)} disabled={isLoading}>
                                         Remove
                                     </Button>
                                 </div>
@@ -142,3 +186,5 @@ export function AssignPaperDialog({ issueId, isOpen, onClose }: AssignPaperDialo
         </Dialog>
     );
 }
+
+import { Input } from "@/components/ui/input";

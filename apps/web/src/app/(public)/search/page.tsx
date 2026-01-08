@@ -54,10 +54,12 @@ export default function SearchPage() {
                                     <p className="text-stone-500 mb-2 line-clamp-2">
                                         {article.abstract}
                                     </p>
-                                    <div className="text-xs text-stone-400 flex gap-2">
-                                        <span>By Author</span>
+                                    <div className="text-xs text-stone-400 flex flex-wrap gap-2">
+                                        <span className="font-medium text-stone-600">By {article.authors?.join(", ")}</span>
                                         <span>•</span>
-                                        <span>Updated {new Date(article.publishDate || Date.now()).toLocaleDateString()}</span>
+                                        <span>{article.issueTitle || "Latest Research"}</span>
+                                        <span>•</span>
+                                        <span>{new Date(article.publishDate || Date.now()).toLocaleDateString("en-US", { year: 'numeric', month: 'short' })}</span>
                                     </div>
                                 </div>
                             ))}

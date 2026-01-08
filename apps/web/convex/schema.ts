@@ -57,6 +57,8 @@ export default defineSchema({
     doi: v.optional(v.string()),
     publishDate: v.number(),
     slug: v.string(), // for URL
+    views: v.optional(v.number()),
+    downloads: v.optional(v.number()),
   })
     .index("by_issue", ["issueId"])
     .index("by_slug", ["slug"])

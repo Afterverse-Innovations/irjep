@@ -79,7 +79,7 @@ export default function AuthorProfilePage() {
                                                 {article.abstract}
                                             </p>
                                             <div className="flex items-center justify-between text-xs text-stone-400">
-                                                <span>Published in {new Date(article.updatedAt).toLocaleDateString()}</span>
+                                                <span>Published in {new Date(article.updatedAt || article._creationTime).toLocaleDateString()}</span>
                                                 <span className="uppercase tracking-widest bg-stone-100 px-2 py-0.5 rounded text-[10px]">Article</span>
                                             </div>
                                         </CardContent>

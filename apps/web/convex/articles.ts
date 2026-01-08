@@ -2,20 +2,71 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
 export const getArticleById = query({
-    args: { articleId: v.id("submissions") },
+    args: { articleId: v.string() }, // Support both article ID and string-based ID
     handler: async (ctx: any, args: any) => {
-        return await ctx.db.get(args.articleId);
+        // Try to get by article ID first
+        let article = await ctx.db.get(args.articleId as any);
+
+        // If not found, check if it's a submission ID (for backward compatibility during migration)
+        if (!article) {
+            article = await ctx.db
+                .query("articles")
+                .withIndex("by_issue") // Just a scan if no specialized index, but let's be safe
+                .filter((q: any) => q.eq(q.field("submissionId"), args.articleId))
+                .first();
+        }
+
+        if (!article) return null;
+
+        const submission = await ctx.db.get(article.submissionId);
+        const issue = await ctx.db.get(article.issueId);
+
+        return {
+            ...article,
+            abstract: submission?.abstract,
+            keywords: submission?.keywords,
+            fileId: submission?.fileId,
+            issueTitle: issue?.title,
+            issueVolume: issue?.volume,
+            issueNumber: issue?.issueNumber,
+        };
     },
 });
 
 export const getLatestArticles = query({
     args: {},
     handler: async (ctx: any) => {
-        return await ctx.db
-            .query("submissions")
-            .withIndex("by_status", (q: any) => q.eq("status", "published"))
+        const articles = await ctx.db
+            .query("articles")
             .order("desc")
             .take(10);
+
+        const results = await Promise.all(articles.map(async (art: any) => {
+            const sub = await ctx.db.get(art.submissionId);
+            return { ...art, abstract: sub?.abstract };
+        }));
+
+        return results;
+    },
+});
+
+export const trackView = mutation({
+    args: { articleId: v.id("articles") },
+    handler: async (ctx: any, args: any) => {
+        const article = await ctx.db.get(args.articleId);
+        if (article) {
+            await ctx.db.patch(args.articleId, { views: (article.views || 0) + 1 });
+        }
+    },
+});
+
+export const trackDownload = mutation({
+    args: { articleId: v.id("articles") },
+    handler: async (ctx: any, args: any) => {
+        const article = await ctx.db.get(args.articleId);
+        if (article) {
+            await ctx.db.patch(args.articleId, { downloads: (article.downloads || 0) + 1 });
+        }
     },
 });
 
@@ -53,6 +104,8 @@ export const assignToIssue = mutation({
             doi: args.doi,
             publishDate: Date.now(),
             slug: submission.title.toLowerCase().replace(/ /g, "-").replace(/[^\w-]/g, ""),
+            views: 0,
+            downloads: 0,
         });
 
         // Update submission status to published
@@ -86,9 +139,16 @@ export const search = query({
     args: { query: v.string() },
     handler: async (ctx: any, args: any) => {
         if (args.query === "") return [];
-        return await ctx.db
+        const articles = await ctx.db
             .query("articles")
             .withSearchIndex("search_title", (q: any) => q.search("title", args.query))
-            .collect();
+            .take(20);
+
+        const results = await Promise.all(articles.map(async (art: any) => {
+            const sub = await ctx.db.get(art.submissionId);
+            return { ...art, abstract: sub?.abstract };
+        }));
+
+        return results;
     },
 });

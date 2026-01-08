@@ -33,3 +33,20 @@ export const togglePublish = mutation({
         await ctx.db.patch(args.id, { isPublished: args.isPublished });
     },
 });
+export const getPublishedIssues = query({
+    args: {},
+    handler: async (ctx: any) => {
+        return await ctx.db
+            .query("issues")
+            .withIndex("by_published", (q: any) => q.eq("isPublished", true))
+            .order("desc")
+            .collect();
+    },
+});
+
+export const getById = query({
+    args: { id: v.id("issues") },
+    handler: async (ctx: any, args: any) => {
+        return await ctx.db.get(args.id);
+    },
+});

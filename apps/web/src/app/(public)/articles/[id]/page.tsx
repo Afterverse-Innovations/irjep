@@ -1,17 +1,38 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../../convex/_generated/api";
 import { useParams } from "next/navigation";
-import { Loader2, FileText, Download, Share2, Printer, Calendar, User } from "lucide-react";
+import { Loader2, FileText, Download, Share2, Printer, Calendar, User, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
+import Link from "next/link";
 
 export default function ArticleDetailsPage() {
     const { id } = useParams();
-    const article = useQuery(api.articles.getArticleById, { articleId: id as any });
+    const article = useQuery(api.articles.getArticleById, { articleId: id as string });
+    const trackView = useMutation(api.articles.trackView);
+    const trackDownload = useMutation(api.articles.trackDownload);
+    const latestArticles = useQuery(api.articles.getLatestArticles);
+    const fileUrl = useQuery(api.files.getUrl, article?.fileId ? { storageId: article.fileId } : "skip" as any);
+
+    useEffect(() => {
+        if (article?._id) {
+            trackView({ articleId: article._id });
+        }
+    }, [article?._id, trackView]);
+
+    const handleDownload = async () => {
+        if (article?._id && fileUrl) {
+            await trackDownload({ articleId: article._id });
+            window.open(fileUrl, "_blank");
+        } else {
+            toast.error("File not available for download.");
+        }
+    };
 
     if (article === undefined) {
-        return <div className="p-16 flex justify-center"><Loader2 className="animate-spin" /></div>;
+        return <div className="p-16 flex justify-center"><Loader2 className="animate-spin text-stone-300" /></div>;
     }
 
     if (!article) {
@@ -21,7 +42,7 @@ export default function ArticleDetailsPage() {
     return (
         <div className="container mx-auto px-4 py-16 max-w-4xl">
             <nav className="mb-8 flex items-center text-xs text-stone-400 gap-2 overflow-x-auto whitespace-nowrap pb-2">
-                <a href="/issues" className="hover:text-stone-900 transition-colors">Issues</a>
+                <Link href="/issues" className="hover:text-stone-900 transition-colors">Issues</Link>
                 <span>/</span>
                 <span className="text-stone-900">Research Paper</span>
                 <span>/</span>
@@ -29,33 +50,46 @@ export default function ArticleDetailsPage() {
             </nav>
 
             <header className="mb-12">
-                <h1 className="text-3xl md:text-5xl font-serif font-bold text-stone-900 leading-tight mb-6">
+                <div className="flex items-center gap-2 mb-4">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
+                        {article.issueTitle || "Latest Research"}
+                    </span>
+                    {article.doi && (
+                        <span className="text-[10px] font-mono text-stone-400">DOI: {article.doi}</span>
+                    )}
+                </div>
+                <h1 className="text-3xl md:text-5xl font-serif font-bold text-stone-900 leading-tight mb-8">
                     {article.title}
                 </h1>
 
                 <div className="flex flex-wrap items-center gap-6 text-sm text-stone-600 mb-8 pb-8 border-b border-stone-100">
                     <div className="flex items-center gap-2">
                         <User size={16} className="text-stone-400" />
-                        <span className="font-medium text-stone-900">Author ID: {article.authorId}</span>
+                        <span className="font-medium text-stone-900">{article.authors?.join(", ")}</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <Calendar size={16} className="text-stone-400" />
-                        <span>Published: {new Date(article.updatedAt).toLocaleDateString()}</span>
+                        <span>Published: {new Date(article.publishDate || article.updatedAt).toLocaleDateString("en-US", { month: 'long', year: 'numeric', day: 'numeric' })}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <FileText size={16} className="text-stone-400" />
-                        <span>Page: 12-25</span>
-                    </div>
+                    {article.pageRange && (
+                        <div className="flex items-center gap-2">
+                            <FileText size={16} className="text-stone-400" />
+                            <span>Pages: {article.pageRange}</span>
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                    <Button size="sm" className="bg-stone-900">
+                    <Button size="sm" className="bg-stone-900" onClick={handleDownload}>
                         <Download size={16} className="mr-2" /> Download PDF
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => {
+                        navigator.clipboard.writeText(window.location.href);
+                        toast.success("Link copied to clipboard");
+                    }}>
                         <Share2 size={16} className="mr-2" /> Share
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => window.print()}>
                         <Printer size={16} className="mr-2" /> Print
                     </Button>
                 </div>
@@ -64,54 +98,67 @@ export default function ArticleDetailsPage() {
             <div className="grid md:grid-cols-4 gap-12">
                 <div className="md:col-span-3 space-y-10">
                     <section>
-                        <h2 className="text-xl font-serif font-bold text-stone-900 mb-4 border-b pb-2 uppercase tracking-wide">Abstract</h2>
-                        <p className="text-stone-800 leading-relaxed text-lg font-light italic bg-stone-50 p-6 rounded-lg border-l-4 border-stone-200">
+                        <h2 className="text-sm font-bold text-stone-400 uppercase tracking-widest mb-4 border-b pb-2">Abstract</h2>
+                        <p className="text-stone-700 leading-relaxed text-lg italic bg-stone-50/50 p-6 rounded-xl border border-stone-100 font-serif">
                             {article.abstract}
                         </p>
                     </section>
 
                     <section>
-                        <h2 className="text-xl font-serif font-bold text-stone-900 mb-4 border-b pb-2 uppercase tracking-wide">Keywords</h2>
+                        <h2 className="text-sm font-bold text-stone-400 uppercase tracking-widest mb-4 border-b pb-2">Keywords</h2>
                         <div className="flex flex-wrap gap-2">
-                            {article.keywords?.map((kw: string) => (
-                                <span key={kw} className="px-3 py-1 bg-white border border-stone-200 rounded-full text-sm text-stone-600">
+                            {article.keywords?.length ? article.keywords.map((kw: string) => (
+                                <span key={kw} className="px-3 py-1 bg-stone-50 border border-stone-100 rounded-lg text-xs font-medium text-stone-600 hover:bg-stone-100 transition-colors cursor-default">
                                     {kw}
                                 </span>
-                            )) || <span className="text-stone-400 text-sm">Ethnomedicine, Traditional Practices, IRJEP</span>}
+                            )) : (
+                                <span className="text-stone-400 text-xs italic">No keywords specified.</span>
+                            )}
                         </div>
                     </section>
 
-                    <section className="pt-8 text-stone-500 text-xs italic space-y-2">
-                        <p>© {new Date().getFullYear()} International Research Journal of Ethnomedicine and Practices. All rights reserved.</p>
-                        <p>How to cite: Author. ({new Date(article.updatedAt).getFullYear()}). {article.title}. IRJEP, Vol 1(2), pp. 12-25.</p>
+                    <section className="pt-8 border-t border-stone-100">
+                        <h2 className="text-sm font-bold text-stone-400 uppercase tracking-widest mb-4">How to cite</h2>
+                        <div className="bg-stone-50 p-4 rounded-lg text-xs text-stone-500 leading-relaxed font-mono">
+                            {article.authors?.[0]} et al. ({new Date(article.publishDate || article.updatedAt).getFullYear()}). &ldquo;{article.title}&rdquo;. IRJEP, {article.issueTitle || "In Press"}, {article.pageRange ? `pp. ${article.pageRange}` : "Early Access"}.
+                        </div>
                     </section>
                 </div>
 
                 <aside className="md:col-span-1">
                     <div className="sticky top-24 space-y-8">
-                        <div className="p-4 bg-stone-50 rounded-lg border border-stone-200">
-                            <h3 className="text-sm font-bold text-stone-900 mb-3 uppercase tracking-wider">Metrics</h3>
-                            <div className="space-y-3 text-xs text-stone-600 font-medium">
-                                <div className="flex justify-between">
-                                    <span>Views</span>
-                                    <span className="text-stone-900">1,240</span>
+                        <div className="p-6 bg-white rounded-2xl border border-stone-200 shadow-sm">
+                            <div className="flex items-center gap-2 mb-4">
+                                <BarChart3 size={16} className="text-stone-400" />
+                                <h3 className="text-xs font-bold text-stone-900 uppercase tracking-wider">Metrics</h3>
+                            </div>
+                            <div className="space-y-4">
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] text-stone-400 uppercase font-bold tracking-tighter">Views</span>
+                                    <span className="text-2xl font-serif font-bold text-stone-900">{(article.views || 0).toLocaleString()}</span>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span>Downloads</span>
-                                    <span className="text-stone-900">342</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>Citations</span>
-                                    <span className="text-stone-900">12</span>
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] text-stone-400 uppercase font-bold tracking-tighter">Downloads</span>
+                                    <span className="text-2xl font-serif font-bold text-stone-900">{(article.downloads || 0).toLocaleString()}</span>
                                 </div>
                             </div>
                         </div>
 
                         <div>
-                            <h3 className="text-sm font-bold text-stone-900 mb-4 uppercase tracking-wider underline underline-offset-8 decoration-stone-200">Related</h3>
-                            <ul className="space-y-4 text-xs font-serif leading-tight">
-                                <li className="hover:text-primary cursor-pointer transition-colors">Digital Documentation of Ayurvedic Papers</li>
-                                <li className="hover:text-primary cursor-pointer transition-colors">Methodological Ethics in Tribal Medicine Research</li>
+                            <h3 className="text-xs font-bold text-stone-900 mb-6 uppercase tracking-wider border-b border-stone-100 pb-2">Latest Research</h3>
+                            <ul className="space-y-6">
+                                {latestArticles?.filter((a: any) => a._id !== article._id).slice(0, 3).map((rel: any) => (
+                                    <li key={rel._id} className="group">
+                                        <Link href={`/articles/${rel._id}`} className="block">
+                                            <h4 className="text-sm font-serif font-bold text-stone-800 group-hover:text-primary transition-colors leading-snug mb-1">
+                                                {rel.title}
+                                            </h4>
+                                            <p className="text-[10px] text-stone-400 uppercase tracking-tighter">
+                                                {new Date(rel.publishDate || rel._creationTime).toLocaleDateString(undefined, { year: 'numeric', month: 'short' })}
+                                            </p>
+                                        </Link>
+                                    </li>
+                                ))}
                             </ul>
                         </div>
                     </div>
@@ -120,3 +167,6 @@ export default function ArticleDetailsPage() {
         </div>
     );
 }
+
+// Minimal toast shim or import
+import { toast } from "sonner";
