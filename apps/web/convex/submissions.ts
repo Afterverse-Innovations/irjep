@@ -74,7 +74,17 @@ export const updateStatus = mutation({
         });
 
         if (args.status === "published") {
-            // Logic to create 'article' entry from submission would go here
+            // Logic to create 'article' entry from submission would go here (now handled by articles:assignToIssue)
         }
+    },
+});
+
+export const getAcceptedSubmissions = query({
+    args: {},
+    handler: async (ctx: any) => {
+        return await ctx.db
+            .query("submissions")
+            .withIndex("by_status", (q: any) => q.eq("status", "accepted"))
+            .collect();
     },
 });
