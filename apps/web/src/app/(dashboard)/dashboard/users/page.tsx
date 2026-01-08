@@ -44,11 +44,14 @@ export default function UserManagementPage() {
                                 <TableCell className="capitalize font-medium">{u.role}</TableCell>
                                 <TableCell>
                                     <div className="flex gap-2">
-                                        {u.role !== "admin" && (
+                                        {u._id !== me?._id && u.role !== "admin" && (
                                             <Button variant="outline" size="sm" onClick={() => handleRoleUpdate(u._id, "admin")}>Make Admin</Button>
                                         )}
-                                        {u.role !== "editor" && (
+                                        {u._id !== me?._id && u.role !== "editor" && u.role !== "admin" && (
                                             <Button variant="outline" size="sm" onClick={() => handleRoleUpdate(u._id, "editor")}>Make Editor</Button>
+                                        )}
+                                        {u._id !== me?._id && u.role !== "author" && (
+                                            <Button variant="outline" size="sm" onClick={() => handleRoleUpdate(u._id, "author")}>Make Author</Button>
                                         )}
                                     </div>
                                 </TableCell>

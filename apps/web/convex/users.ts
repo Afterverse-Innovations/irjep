@@ -26,11 +26,15 @@ export async function getCurrentUser(ctx: any) {
         .first();
 
     if (!user) {
+        // Bootstrap: First user to register becomes admin
+        const firstUser = await ctx.db.query("users").first();
+        const role = firstUser === null ? "admin" : "author";
+
         const userId = await ctx.db.insert("users", {
             clerkId: identity.subject,
             email: identity.email ?? "no-email@provided.com",
             name: identity.name ?? identity.nickname ?? "Scholar",
-            role: "author",
+            role,
         });
         user = await ctx.db.get(userId);
     }
@@ -53,16 +57,23 @@ export const syncUser = mutation({
             .first();
 
         if (user) {
-            // Update logic can go here
+            // Update existing user info if needed
+            await ctx.db.patch(user._id, {
+                email: args.email,
+                name: args.name || user.name,
+            });
             return user._id;
         }
 
-        // Default role is 'author'
+        // Bootstrap: First user to register becomes admin
+        const firstUser = await ctx.db.query("users").first();
+        const role = firstUser === null ? "admin" : "author";
+
         return await ctx.db.insert("users", {
             clerkId: identity.subject,
             email: args.email,
             name: args.name,
-            role: "author",
+            role,
         });
     },
 });
