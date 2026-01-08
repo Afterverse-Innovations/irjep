@@ -43,7 +43,7 @@ export default function DashboardPage() {
             {(!user || user.role === "author") && (
                 <Card className="bg-stone-50 border-dashed border-2 border-stone-200 shadow-none">
                     <CardHeader>
-                        <CardTitle className="font-serif text-xl">Submit a New Manuscript</CardTitle>
+                        <CardTitle className="font-serif text-xl">Submit a New Paper</CardTitle>
                         <CardDescription>Ready to publish your research? Start the submission process now.</CardDescription>
                     </CardHeader>
                     <CardContent>

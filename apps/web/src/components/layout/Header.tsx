@@ -32,7 +32,7 @@ export function Header() {
                         <UserButton afterSignOutUrl="/" />
                     </SignedIn>
                     <Link href="/submit">
-                        <Button size="sm">Submit Manuscript</Button>
+                        <Button size="sm">Submit Paper</Button>
                     </Link>
                 </div>
             </div>

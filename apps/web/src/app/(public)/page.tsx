@@ -31,7 +31,7 @@ export default function Home() {
                         </Link>
                         <Link href="/submit">
                             <Button variant="outline" size="lg" className="h-12 px-8 text-base bg-white/50 backdrop-blur">
-                                Submit Manuscript
+                                Submit Paper
                             </Button>
                         </Link>
                     </div>
@@ -88,11 +88,11 @@ function LatestArticlesSection() {
                     {articles === undefined ? (
                         <div className="text-center py-12"><Loader2 className="animate-spin inline mr-2" /> Loading latest research...</div>
                     ) : articles.length === 0 ? (
-                        <div className="text-center text-stone-400 py-12">No articles published yet.</div>
+                        <div className="text-center text-stone-400 py-12">No papers published yet.</div>
                     ) : (
                         articles.map((article: any) => (
                             <div key={article._id} className="p-6 bg-white rounded-xl border border-stone-100 shadow-sm hover:shadow-md transition-shadow group">
-                                <span className="text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full mb-3 inline-block">Research Article</span>
+                                <span className="text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full mb-3 inline-block">Research Paper</span>
                                 <h3 className="text-xl font-bold mb-2 font-serif text-stone-900 group-hover:text-primary transition-colors">
                                     <Link href={`/articles/${article._id}`}>
                                         {article.title}

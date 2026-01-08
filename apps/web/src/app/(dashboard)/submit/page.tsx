@@ -19,7 +19,10 @@ import { useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, LogIn } from "lucide-react";
+import { toast } from "sonner";
+import { useUser, SignInButton } from "@clerk/nextjs";
+import { AlertModal } from "@/components/ui/alert-modal";
 
 const formSchema = z.object({
     title: z.string().min(5, {
@@ -31,6 +34,7 @@ const formSchema = z.object({
 });
 
 export default function SubmitPage() {
+    const { isLoaded, isSignedIn } = useUser();
     const createSubmission = useMutation(api.submissions.create);
     const generateUploadUrl = useMutation(api.files.generateUploadUrl);
     const router = useRouter();
@@ -50,7 +54,6 @@ export default function SubmitPage() {
             setIsSubmitting(true);
 
             let storageId = undefined;
-            // Note: This fetch will fail until Convex is configured with storage
             if (file) {
                 try {
                     const postUrl = await generateUploadUrl();
@@ -62,8 +65,7 @@ export default function SubmitPage() {
                     const json = await result.json();
                     storageId = json.storageId;
                 } catch (e) {
-                    console.error("Upload failed (expected if not configured)", e);
-                    // Proceed without file for demo
+                    toast.warning("File upload failed. Proceeding with metadata only.");
                 }
             }
 
@@ -73,21 +75,43 @@ export default function SubmitPage() {
                 fileId: storageId,
             });
 
-            alert("Submission received!");
+            toast.success("Paper submitted successfully!");
             router.push("/dashboard");
         } catch (error) {
-            console.error(error);
-            alert("Failed to submit. Ensure you are logged in.");
+            toast.error("Failed to submit paper. Please check your connection.");
         } finally {
             setIsSubmitting(false);
         }
+    }
+
+    if (!isLoaded) return <div className="p-16 flex justify-center"><Loader2 className="animate-spin text-stone-300" /></div>;
+
+    if (!isSignedIn) {
+        return (
+            <div className="max-w-2xl mx-auto py-16 text-center space-y-8">
+                <div className="bg-stone-50 border border-stone-200 p-10 rounded-2xl shadow-sm">
+                    <div className="w-16 h-16 bg-stone-200 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <LogIn className="h-8 w-8 text-stone-600" />
+                    </div>
+                    <h1 className="text-3xl font-serif font-bold text-stone-900 mb-4">Sign in to Submit</h1>
+                    <p className="text-stone-600 mb-8 max-w-md mx-auto">
+                        To maintain the integrity of our peer-review process, all authors must be registered and logged in to submit their research papers.
+                    </p>
+                    <SignInButton mode="modal">
+                        <Button size="lg" className="px-8 h-12 text-base">
+                            Log In or Sign Up
+                        </Button>
+                    </SignInButton>
+                </div>
+            </div>
+        );
     }
 
     return (
         <div className="max-w-2xl mx-auto">
             <div className="mb-8">
                 <h1 className="text-3xl font-serif font-bold text-stone-900">New Submission</h1>
-                <p className="text-stone-500 mt-2">Please fill in the details of your manuscript. Ensure your document is formatted according to our guidelines.</p>
+                <p className="text-stone-500 mt-2">Please fill in the details of your research paper. Ensure your document is formatted according to our guidelines.</p>
             </div>
 
             <div className="bg-white p-6 rounded-lg border border-stone-200 shadow-sm">
@@ -98,7 +122,7 @@ export default function SubmitPage() {
                             name="title"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Manuscript Title</FormLabel>
+                                    <FormLabel>Paper Title</FormLabel>
                                     <FormControl>
                                         <Input placeholder="e.g. Ethnobotanical study of..." {...field} />
                                     </FormControl>
@@ -124,7 +148,7 @@ export default function SubmitPage() {
                         />
 
                         <FormItem>
-                            <FormLabel>Manuscript File (PDF)</FormLabel>
+                            <FormLabel>Paper File (PDF)</FormLabel>
                             <FormControl>
                                 <Input
                                     type="file"
@@ -132,12 +156,12 @@ export default function SubmitPage() {
                                     onChange={(e) => setFile(e.target.files?.[0] || null)}
                                 />
                             </FormControl>
-                            <FormDescription>Upload your full manuscript in PDF format.</FormDescription>
+                            <FormDescription>Upload your full research paper in PDF format.</FormDescription>
                         </FormItem>
 
-                        <Button type="submit" disabled={isSubmitting}>
+                        <Button type="submit" disabled={isSubmitting} className="w-full md:w-auto">
                             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {isSubmitting ? "Submitting..." : "Submit Manuscript"}
+                            {isSubmitting ? "Submitting..." : "Submit Paper"}
                         </Button>
                     </form>
                 </Form>

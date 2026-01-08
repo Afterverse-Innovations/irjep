@@ -7,8 +7,8 @@ export default function PoliciesPage() {
                 <section>
                     <h2 className="text-2xl font-serif font-bold text-stone-900 mb-4">Peer Review Policy</h2>
                     <p className="text-stone-700 leading-relaxed">
-                        All articles submitted to IRJEP undergo initial editorial evaluation to check for scope and basic standards.
-                        Manuscripts passing this stage are subject to a <strong>double-blind peer review</strong> by at least two independent subject experts.
+                        All papers submitted to IRJEP undergo initial editorial evaluation to check for scope and basic standards.
+                        Papers passing this stage are subject to a <strong>double-blind peer review</strong> by at least two independent subject experts.
                         Reviewers remain anonymous to authors, and authors to reviewers. Editorial decisions are based on academic quality,
                         originality, validity of findings, and ethical compliance.
                     </p>
@@ -30,8 +30,8 @@ export default function PoliciesPage() {
                 <section>
                     <h2 className="text-2xl font-serif font-bold text-stone-900 mb-4">Plagiarism Policy</h2>
                     <p className="text-stone-700 leading-relaxed">
-                        Submitted articles must be original and appropriately cited. IRJEP uses similarity checking software to screen for plagiarism.
-                        Any manuscript found to have significant unoriginal content without proper attribution will be rejected.
+                        Submitted papers must be original and appropriately cited. IRJEP uses similarity checking software to screen for plagiarism.
+                        Any paper found to have significant unoriginal content without proper attribution will be rejected.
                     </p>
                 </section>
 

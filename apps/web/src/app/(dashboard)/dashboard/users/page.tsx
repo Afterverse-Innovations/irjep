@@ -4,11 +4,21 @@ import { api } from "../../../../../convex/_generated/api";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function UserManagementPage() {
     const users = useQuery(api.users.list);
     const setRole = useMutation(api.users.setRole);
     const me = useQuery(api.users.viewer);
+
+    const handleRoleUpdate = async (userId: any, role: string) => {
+        try {
+            await setRole({ userId, role });
+            toast.success(`User role updated to ${role}.`);
+        } catch (error) {
+            toast.error("Failed to update user role.");
+        }
+    };
 
     if (!users) return <div className="p-4"><Loader2 className="animate-spin" /></div>;
     if (me?.role !== "admin") return <div className="p-4 text-red-500">Unauthorized</div>;
@@ -35,10 +45,10 @@ export default function UserManagementPage() {
                                 <TableCell>
                                     <div className="flex gap-2">
                                         {u.role !== "admin" && (
-                                            <Button variant="outline" size="sm" onClick={() => setRole({ userId: u._id, role: "admin" })}>Make Admin</Button>
+                                            <Button variant="outline" size="sm" onClick={() => handleRoleUpdate(u._id, "admin")}>Make Admin</Button>
                                         )}
                                         {u.role !== "editor" && (
-                                            <Button variant="outline" size="sm" onClick={() => setRole({ userId: u._id, role: "editor" })}>Make Editor</Button>
+                                            <Button variant="outline" size="sm" onClick={() => handleRoleUpdate(u._id, "editor")}>Make Editor</Button>
                                         )}
                                     </div>
                                 </TableCell>

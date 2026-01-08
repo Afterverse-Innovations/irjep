@@ -1,17 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
-import { UserButton } from "@clerk/nextjs";
+import { UserButton, useUser } from "@clerk/nextjs";
 import { Loader2, LayoutDashboard, Send, FileText, Users, BookOpen, ClipboardList } from "lucide-react";
+import { useEffect } from "react";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-    const user = useQuery(api.users.viewer);
+    const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
+    const convexUser = useQuery(api.users.viewer);
+    const syncUser = useMutation(api.users.syncUser);
 
-    if (user === undefined) {
+    useEffect(() => {
+        if (clerkLoaded && clerkUser && !convexUser && convexUser !== undefined) {
+            syncUser({
+                name: clerkUser.fullName || clerkUser.firstName || "Scholar",
+                email: clerkUser.primaryEmailAddress?.emailAddress || "",
+            }).catch(console.error);
+        }
+    }, [clerkLoaded, clerkUser, convexUser, syncUser]);
+
+    if (!clerkLoaded || convexUser === undefined) {
         return <div className="flex h-screen items-center justify-center text-stone-500"><Loader2 className="animate-spin mr-2" /> Loading Portal...</div>;
     }
+
+    const user = convexUser;
 
     return (
         <div className="flex h-screen bg-stone-50">

@@ -15,7 +15,7 @@ export default function ArticleDetailsPage() {
     }
 
     if (!article) {
-        return <div className="p-16 text-center text-stone-500 font-serif text-2xl">Article Not Found</div>;
+        return <div className="p-16 text-center text-stone-500 font-serif text-2xl">Paper Not Found</div>;
     }
 
     return (
@@ -23,7 +23,7 @@ export default function ArticleDetailsPage() {
             <nav className="mb-8 flex items-center text-xs text-stone-400 gap-2 overflow-x-auto whitespace-nowrap pb-2">
                 <a href="/issues" className="hover:text-stone-900 transition-colors">Issues</a>
                 <span>/</span>
-                <span className="text-stone-900">Research Article</span>
+                <span className="text-stone-900">Research Paper</span>
                 <span>/</span>
                 <span className="truncate">{article.title}</span>
             </nav>
@@ -110,7 +110,7 @@ export default function ArticleDetailsPage() {
                         <div>
                             <h3 className="text-sm font-bold text-stone-900 mb-4 uppercase tracking-wider underline underline-offset-8 decoration-stone-200">Related</h3>
                             <ul className="space-y-4 text-xs font-serif leading-tight">
-                                <li className="hover:text-primary cursor-pointer transition-colors">Digital Documentation of Ayurvedic Manuscripts</li>
+                                <li className="hover:text-primary cursor-pointer transition-colors">Digital Documentation of Ayurvedic Papers</li>
                                 <li className="hover:text-primary cursor-pointer transition-colors">Methodological Ethics in Tribal Medicine Research</li>
                             </ul>
                         </div>

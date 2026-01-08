@@ -1,5 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { getCurrentUser } from "./users";
 
 export const create = mutation({
     args: {
@@ -8,15 +9,8 @@ export const create = mutation({
         fileId: v.optional(v.string()),
     },
     handler: async (ctx: any, args: any) => {
-        const identity = await ctx.auth.getUserIdentity();
-        if (!identity) throw new Error("Unauthorized");
-
-        const user = await ctx.db
-            .query("users")
-            .withIndex("by_clerkId", (q: any) => q.eq("clerkId", identity.subject))
-            .first();
-
-        if (!user) throw new Error("User not found");
+        const user = await getCurrentUser(ctx);
+        if (!user) throw new Error("Unauthorized");
 
         return await ctx.db.insert("submissions", {
             title: args.title,

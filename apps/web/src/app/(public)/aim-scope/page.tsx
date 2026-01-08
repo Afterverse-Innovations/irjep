@@ -15,7 +15,7 @@ export default function AimScopePage() {
             <div className="grid md:grid-cols-2 gap-12">
                 <section>
                     <h3 className="text-2xl font-serif font-bold text-stone-900 mb-4">In Scope</h3>
-                    <p className="text-stone-600 mb-4">IRJEP publishes original research articles, review articles, and case studies related to:</p>
+                    <p className="text-stone-600 mb-4">IRJEP publishes original research papers, review papers, and case studies related to:</p>
                     <ul className="list-disc pl-5 space-y-2 text-stone-700">
                         <li>Ayurveda and allied traditional systems (Siddha, Unani)</li>
                         <li>Folk and tribal medicine</li>
@@ -31,7 +31,7 @@ export default function AimScopePage() {
                     <div className="bg-red-50 border border-red-100 p-6 rounded-md">
                         <ul className="list-disc pl-5 space-y-2 text-stone-700">
                             <li>Submissions that are purely promotional in nature.</li>
-                            <li>Articles lacking proper scholarly references or methodology.</li>
+                            <li>Papers lacking proper scholarly references or methodology.</li>
                             <li>Unsubstantiated medical claims without empirical or observational basis.</li>
                             <li>Studies that violate ethical standards regarding human or animal subjects.</li>
                         </ul>

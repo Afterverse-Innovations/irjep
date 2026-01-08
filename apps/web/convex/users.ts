@@ -6,13 +6,37 @@ export const viewer = query({
     handler: async (ctx: any) => {
         const identity = await ctx.auth.getUserIdentity();
         if (!identity) return null;
-        const user = await ctx.db
+        return await ctx.db
             .query("users")
             .withIndex("by_clerkId", (q: any) => q.eq("clerkId", identity.subject))
             .first();
-        return user;
     },
 });
+
+/**
+ * Helper to get the current user or create one if they don't exist.
+ */
+export async function getCurrentUser(ctx: any) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+
+    let user = await ctx.db
+        .query("users")
+        .withIndex("by_clerkId", (q: any) => q.eq("clerkId", identity.subject))
+        .first();
+
+    if (!user) {
+        const userId = await ctx.db.insert("users", {
+            clerkId: identity.subject,
+            email: identity.email ?? "no-email@provided.com",
+            name: identity.name ?? identity.nickname ?? "Scholar",
+            role: "author",
+        });
+        user = await ctx.db.get(userId);
+    }
+
+    return user;
+}
 
 export const syncUser = mutation({
     args: {
