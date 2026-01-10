@@ -76,7 +76,7 @@ export default function SubmissionDetailsPage() {
                                 <div className="flex items-center justify-between p-3 bg-stone-50 rounded-lg border border-stone-100">
                                     <div className="flex items-center gap-3">
                                         <FileText size={20} className="text-emerald-600" />
-                                        <span className="text-sm font-medium text-stone-700">Manuscript.pdf</span>
+                                        <span className="text-sm font-medium text-stone-700">Paper.pdf</span>
                                     </div>
                                     <Button size="sm" variant="ghost">Download</Button>
                                 </div>

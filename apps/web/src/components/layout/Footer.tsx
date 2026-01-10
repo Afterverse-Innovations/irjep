@@ -25,7 +25,7 @@ export function Footer() {
                         <h4 className="font-semibold text-stone-900 mb-4">Resources</h4>
                         <ul className="space-y-2 text-sm">
                             <li><Link href="/author-guidelines" className="hover:text-stone-900 transition-colors">Author Guidelines</Link></li>
-                            <li><Link href="/submit" className="hover:text-stone-900 transition-colors">Submit Manuscript</Link></li>
+                            <li><Link href="/submit" className="hover:text-stone-900 transition-colors">Submit Paper</Link></li>
                             <li><Link href="/issues" className="hover:text-stone-900 transition-colors">Archives</Link></li>
                             <li><Link href="/contact" className="hover:text-stone-900 transition-colors">Contact</Link></li>
                         </ul>

@@ -3,7 +3,7 @@
 import { useQuery } from "convex/react";
 import { api } from "../../../../../convex/_generated/api";
 import { useParams } from "next/navigation";
-import { Loader2, Mail, GraduationCap, BookOpen } from "lucide-react";
+import { Loader2, Mail, GraduationCap, BookOpen, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
@@ -59,28 +59,31 @@ export default function AuthorProfilePage() {
                             <BookOpen size={20} className="text-stone-400" /> Published Articles
                         </h2>
 
-                        <div className="space-y-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             {articlesOriginal.length === 0 ? (
-                                <div className="p-8 text-center bg-stone-50 rounded-lg border border-dashed border-stone-200 text-stone-400">
+                                <div className="col-span-full p-8 text-center bg-stone-50 rounded-lg border border-dashed border-stone-200 text-stone-400">
                                     No published articles found for this author.
                                 </div>
                             ) : (
                                 articlesOriginal.map((article: any) => (
-                                    <Card key={article._id} className="hover:shadow-md transition-shadow cursor-pointer">
-                                        <CardHeader>
-                                            <CardTitle className="font-serif text-lg text-stone-900 leading-snug">
-                                                <Link href={`/articles/${article._id}`} className="hover:text-primary transition-colors">
+                                    <Card key={article._id} className="flex flex-col hover:shadow-lg transition-all duration-300 border-stone-100 group">
+                                        <CardHeader className="flex-1 pb-2">
+                                            <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded uppercase tracking-wider mb-2 self-start">Research Paper</span>
+                                            <CardTitle className="font-serif text-lg text-stone-900 leading-snug group-hover:text-emerald-700 transition-colors">
+                                                <Link href={`/articles/${article._id}`}>
                                                     {article.title}
                                                 </Link>
                                             </CardTitle>
                                         </CardHeader>
                                         <CardContent>
-                                            <p className="text-sm text-stone-500 line-clamp-2 mb-4">
+                                            <p className="text-xs text-stone-500 line-clamp-3 mb-6 leading-relaxed">
                                                 {article.abstract}
                                             </p>
-                                            <div className="flex items-center justify-between text-xs text-stone-400">
-                                                <span>Published in {new Date(article.updatedAt || article._creationTime).toLocaleDateString()}</span>
-                                                <span className="uppercase tracking-widest bg-stone-100 px-2 py-0.5 rounded text-[10px]">Article</span>
+                                            <div className="flex items-center justify-between text-[10px] text-stone-400 font-medium pt-4 border-t border-stone-50">
+                                                <span className="uppercase tracking-tighter font-bold">{new Date(article.updatedAt || article._creationTime).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}</span>
+                                                <Link href={`/articles/${article._id}`} className="text-stone-900 hover:text-emerald-700 font-bold uppercase tracking-widest flex items-center gap-1">
+                                                    View Details <ArrowRight size={10} />
+                                                </Link>
                                             </div>
                                         </CardContent>
                                     </Card>
