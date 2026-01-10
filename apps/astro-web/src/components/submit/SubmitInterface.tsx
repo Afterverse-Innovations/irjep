@@ -20,8 +20,7 @@ import { api } from "@local-convex/_generated/api";
 import { useState } from "react";
 import { Loader2, LogIn, Upload, FileCheck, Info } from "lucide-react";
 import { toast } from "sonner";
-import { SignInButton } from "@clerk/astro/react";
-import { useUser } from "@clerk/clerk-react";
+import { SignInButton, useUser } from "@clerk/clerk-react";
 import { withConvex } from "@/components/ConvexClientProvider";
 
 const formSchema = z.object({

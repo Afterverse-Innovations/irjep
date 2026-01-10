@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@local-convex/_generated/api";
-import { UserButton, useUser } from "@clerk/astro/react";
+import { UserButton, useUser } from "@clerk/clerk-react";
 import { Loader2, LayoutDashboard, Send, FileText, Users, BookOpen, ClipboardList } from "lucide-react";
 import { useEffect } from "react";
 import { Link } from "@/components/ui/link";
