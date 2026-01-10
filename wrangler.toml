@@ -1,0 +1,9 @@
+name = "irjep-web"
+compatibility_date = "2025-01-01"
+
+# Cloudflare Pages will handle the build,
+# Wrangler is only used for local + infra parity
+pages_build_output_dir = ".vercel/output/static"
+
+[env.production]
+vars = { NODE_ENV = "production" }
