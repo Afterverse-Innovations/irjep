@@ -1,0 +1,10 @@
+---
+import PublicLayout from "@/layouts/PublicLayout.astro";
+import { IssueDetails } from "@/components/issues/IssueDetails";
+
+const { id } = Astro.params;
+---
+
+<PublicLayout>
+    {id && <IssueDetails id={id} client:load />}
+</PublicLayout>

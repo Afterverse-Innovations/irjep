@@ -1,0 +1,8 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import { ReviewQueue } from "@/components/dashboard/ReviewQueue";
+---
+
+<DashboardLayout>
+    <ReviewQueue client:load />
+</DashboardLayout>

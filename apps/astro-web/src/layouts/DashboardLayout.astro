@@ -1,0 +1,10 @@
+---
+import Layout from "./Layout.astro";
+import DashboardLayoutReact from "@/components/dashboard/DashboardLayout";
+---
+
+<Layout title="Dashboard | IRJEP Portal">
+    <DashboardLayoutReact client:only="react">
+        <slot />
+    </DashboardLayoutReact>
+</Layout>

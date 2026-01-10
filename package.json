@@ -8,11 +8,15 @@
   ],
   "scripts": {
     "build": "turbo build",
-    "dev": "turbo dev convex:dev",
+    "dev": "turbo dev",
     "lint": "turbo lint",
-    "clean": "turbo clean"
+    "clean": "turbo clean",
+    "convex:dev": "convex dev",
+    "astro:dev": "npm run dev -w astro-web",
+    "codegen": "convex codegen"
   },
   "devDependencies": {
-    "turbo": "^2.7.3"
+    "turbo": "^2.7.3",
+    "convex": "^1.31.3"
   }
 }
