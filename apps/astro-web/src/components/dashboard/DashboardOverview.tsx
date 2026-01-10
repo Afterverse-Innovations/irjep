@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
 import { ArrowRight, Loader2, Send } from "lucide-react";
-import { withConvexOnly } from "@/components/ConvexClientProvider";
+import { withConvex } from "@/components/ConvexClientProvider";
 
 function DashboardOverviewInner() {
     const user = useQuery(api.users.viewer);
@@ -53,7 +53,7 @@ function DashboardOverviewInner() {
             </div>
 
             {(!user || user.role === "author") && (
-                <div className="p-8 bg-stone-900 rounded-[2rem] text-white overflow-hidden relative group">
+                <div className="p-8 bg-stone-900 rounded-4xl text-white overflow-hidden relative group">
                     <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl group-hover:bg-emerald-500/20 transition-colors duration-500"></div>
                     <div className="relative z-10 max-w-xl space-y-6">
                         <div className="space-y-2">
@@ -72,4 +72,4 @@ function DashboardOverviewInner() {
     );
 }
 
-export const DashboardOverview = withConvexOnly(DashboardOverviewInner);
+export const DashboardOverview = withConvex(DashboardOverviewInner);

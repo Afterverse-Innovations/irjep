@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Loader2, Shield, UserPen, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import { withConvexOnly } from "@/components/ConvexClientProvider";
+import { withConvex } from "@/components/ConvexClientProvider";
 
 function UserManagementInner() {
     const users = useQuery(api.users.list);
@@ -43,7 +43,7 @@ function UserManagementInner() {
                 <p className="text-stone-500 font-medium tracking-wide">Assign roles and permissions to journal members.</p>
             </div>
 
-            <div className="bg-white rounded-[2rem] border border-stone-100 shadow-sm overflow-hidden p-2">
+            <div className="bg-white rounded-4xl border border-stone-100 shadow-sm overflow-hidden p-2">
                 <Table>
                     <TableHeader className="bg-stone-50/50">
                         <TableRow className="border-none hover:bg-transparent">
@@ -103,4 +103,4 @@ function UserManagementInner() {
     );
 }
 
-export const UserManagement = withConvexOnly(UserManagementInner);
+export const UserManagement = withConvex(UserManagementInner);

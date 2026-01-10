@@ -10,7 +10,7 @@ import { AssignPaperDialog } from "./assign-paper-dialog";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { withConvexOnly } from "@/components/ConvexClientProvider";
+import { withConvex } from "@/components/ConvexClientProvider";
 
 function ManageIssuesInner() {
     const issues = useQuery(api.issues.list);
@@ -115,4 +115,4 @@ function ManageIssuesInner() {
     );
 }
 
-export const ManageIssues = withConvexOnly(ManageIssuesInner);
+export const ManageIssues = withConvex(ManageIssuesInner);

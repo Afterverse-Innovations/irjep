@@ -1,13 +1,10 @@
 ---
 import Layout from "./Layout.astro";
 import DashboardLayoutReact from "@/components/dashboard/DashboardLayout";
-import { GlobalClerkProvider } from "@/components/GlobalClerkProvider";
 ---
 
 <Layout title="Dashboard | IRJEP Portal">
-    <GlobalClerkProvider client:only="react">
-        <DashboardLayoutReact client:only="react">
-            <slot />
-        </DashboardLayoutReact>
-    </GlobalClerkProvider>
+    <DashboardLayoutReact client:only="react">
+        <slot />
+    </DashboardLayoutReact>
 </Layout>

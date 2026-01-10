@@ -1,6 +1,6 @@
 "use client";
 
-import { ClerkProvider } from "@clerk/clerk-react";
+import { ClerkProvider } from "@clerk/astro/react";
 import type { ReactNode } from "react";
 
 export function GlobalClerkProvider({ children }: { children: ReactNode }) {

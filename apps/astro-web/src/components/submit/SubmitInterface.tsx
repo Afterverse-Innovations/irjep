@@ -20,7 +20,7 @@ import { api } from "@local-convex/_generated/api";
 import { useState } from "react";
 import { Loader2, LogIn, Upload, FileCheck, Info } from "lucide-react";
 import { toast } from "sonner";
-import { SignInButton, useUser } from "@clerk/clerk-react";
+import { SignInButton, useAuth } from "@clerk/astro/react";
 import { withConvex } from "@/components/ConvexClientProvider";
 
 const formSchema = z.object({
@@ -33,7 +33,7 @@ const formSchema = z.object({
 });
 
 function SubmitInterfaceInner() {
-    const { isLoaded, isSignedIn } = useUser();
+    const { isLoaded, isSignedIn } = useAuth();
     const createSubmission = useMutation(api.submissions.create);
     const generateUploadUrl = useMutation(api.files.generateUploadUrl);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -90,7 +90,7 @@ function SubmitInterfaceInner() {
                     <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-stone-100/50 rounded-full blur-3xl"></div>
 
                     <div className="relative z-10">
-                        <div className="w-24 h-24 bg-stone-50 rounded-[2rem] flex items-center justify-center mx-auto mb-10 border border-stone-100 shadow-inner">
+                    <div className="w-24 h-24 bg-stone-50 rounded-4xl flex items-center justify-center mx-auto mb-10 border border-stone-100 shadow-inner">
                             <LogIn className="h-10 w-10 text-stone-900" />
                         </div>
                         <h1 className="text-4xl font-serif font-bold text-stone-900 mb-6 tracking-tight">Author Portal</h1>
@@ -161,7 +161,7 @@ function SubmitInterfaceInner() {
                             <label className="text-xs font-bold text-stone-400 uppercase tracking-widest flex items-center gap-2">
                                 Paper File (PDF) <span className="text-emerald-500">*</span>
                             </label>
-                            <div className={`relative border-2 border-dashed rounded-[2rem] p-10 transition-all duration-300 text-center ${file ? 'border-emerald-200 bg-emerald-50/30' : 'border-stone-100 bg-stone-50/50 hover:bg-stone-50 hover:border-stone-200'}`}>
+                            <div className={`relative border-2 border-dashed rounded-4xl p-10 transition-all duration-300 text-center ${file ? 'border-emerald-200 bg-emerald-50/30' : 'border-stone-100 bg-stone-50/50 hover:bg-stone-50 hover:border-stone-200'}`}>
                                 <input
                                     type="file"
                                     accept=".pdf"

@@ -2,25 +2,26 @@
 
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@local-convex/_generated/api";
-import { UserButton, useUser } from "@clerk/clerk-react";
+import { UserButton, useAuth } from "@clerk/astro/react";
 import { Loader2, LayoutDashboard, Send, FileText, Users, BookOpen, ClipboardList } from "lucide-react";
 import { useEffect } from "react";
 import { Link } from "@/components/ui/link";
-import { withConvexOnly } from "@/components/ConvexClientProvider";
+import { withConvex } from "@/components/ConvexClientProvider";
 
 function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
-    const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
+    const { userId, isLoaded: clerkLoaded, isSignedIn } = useAuth();
     const convexUser = useQuery(api.users.viewer);
     const syncUser = useMutation(api.users.syncUser);
 
     useEffect(() => {
-        if (clerkLoaded && clerkUser && !convexUser && convexUser !== undefined) {
+        if (clerkLoaded && userId && isSignedIn && !convexUser && convexUser !== undefined) {
+            // We'll sync with minimal data since we don't have the full user object
             syncUser({
-                name: clerkUser.fullName || clerkUser.firstName || "Scholar",
-                email: clerkUser.primaryEmailAddress?.emailAddress || "",
+                name: "Scholar", // Default name since we don't have access to full user data
+                email: "", // We'll let the backend handle this via Clerk's user ID
             }).catch(console.error);
         }
-    }, [clerkLoaded, clerkUser, convexUser, syncUser]);
+    }, [clerkLoaded, userId, isSignedIn, convexUser, syncUser]);
 
     if (!clerkLoaded || convexUser === undefined) {
         return <div className="flex h-screen items-center justify-center text-stone-500 bg-stone-50"><Loader2 className="animate-spin mr-2" /> Loading Portal...</div>;
@@ -101,5 +102,5 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
     );
 }
 
-const DashboardLayout = withConvexOnly(DashboardLayoutInner);
+const DashboardLayout = withConvex(DashboardLayoutInner);
 export default DashboardLayout;
