@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Loader2, Shield, UserPen, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import { withConvex } from "@/components/ConvexClientProvider";
+import { withConvexOnly } from "@/components/ConvexClientProvider";
 
 function UserManagementInner() {
     const users = useQuery(api.users.list);
@@ -103,4 +103,4 @@ function UserManagementInner() {
     );
 }
 
-export const UserManagement = withConvex(UserManagementInner);
+export const UserManagement = withConvexOnly(UserManagementInner);

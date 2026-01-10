@@ -6,7 +6,7 @@ import { UserButton, useUser } from "@clerk/clerk-react";
 import { Loader2, LayoutDashboard, Send, FileText, Users, BookOpen, ClipboardList } from "lucide-react";
 import { useEffect } from "react";
 import { Link } from "@/components/ui/link";
-import { withConvex } from "@/components/ConvexClientProvider";
+import { withConvexOnly } from "@/components/ConvexClientProvider";
 
 function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
     const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
@@ -101,5 +101,5 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
     );
 }
 
-const DashboardLayout = withConvex(DashboardLayoutInner);
+const DashboardLayout = withConvexOnly(DashboardLayoutInner);
 export default DashboardLayout;

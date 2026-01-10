@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, FileText, ExternalLink, Clock, Plus } from "lucide-react";
 import { Link } from "@/components/ui/link";
 import { Button } from "@/components/ui/button";
-import { withConvex } from "@/components/ConvexClientProvider";
+import { withConvexOnly } from "@/components/ConvexClientProvider";
 
 function SubmissionsListInner() {
     const submissions = useQuery(api.submissions.getMySubmissions);
@@ -113,4 +113,4 @@ function StatusBadge({ status }: { status: string }) {
     );
 }
 
-export const SubmissionsList = withConvex(SubmissionsListInner);
+export const SubmissionsList = withConvexOnly(SubmissionsListInner);

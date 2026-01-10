@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, CheckCircle, XCircle, Clock, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import { withConvex } from "@/components/ConvexClientProvider";
+import { withConvexOnly } from "@/components/ConvexClientProvider";
 
 function ReviewQueueInner() {
     const pending = useQuery(api.submissions.getPendingSubmissions);
@@ -119,4 +119,4 @@ function ReviewQueueInner() {
     );
 }
 
-export const ReviewQueue = withConvex(ReviewQueueInner);
+export const ReviewQueue = withConvexOnly(ReviewQueueInner);

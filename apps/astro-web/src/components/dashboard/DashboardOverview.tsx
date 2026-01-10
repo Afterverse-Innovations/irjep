@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
 import { ArrowRight, Loader2, Send } from "lucide-react";
-import { withConvex } from "@/components/ConvexClientProvider";
+import { withConvexOnly } from "@/components/ConvexClientProvider";
 
 function DashboardOverviewInner() {
     const user = useQuery(api.users.viewer);
@@ -72,4 +72,4 @@ function DashboardOverviewInner() {
     );
 }
 
-export const DashboardOverview = withConvex(DashboardOverviewInner);
+export const DashboardOverview = withConvexOnly(DashboardOverviewInner);
