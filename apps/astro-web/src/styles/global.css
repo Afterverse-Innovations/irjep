@@ -1,1 +1,36 @@
 @import "tailwindcss";
+
+/* Custom card border radius overrides */
+.bg-white,
+[class*="bg-white"],
+.border,
+[class*="border-"],
+.rounded-4xl,
+.rounded-\[2\.5rem\],
+.rounded-\[3rem\],
+.rounded-\[2rem\] {
+  border-radius: 0.5rem !important;
+  /* 8px - equivalent to rounded-lg */
+}
+
+/* Specific overrides for common card patterns */
+.shadow-xl,
+.shadow-2xl {
+  border-radius: 0.5rem !important;
+}
+
+/* Button border radius - keep slightly smaller */
+button,
+.btn,
+[role="button"] {
+  border-radius: 0.375rem !important;
+  /* 6px - equivalent to rounded-md */
+}
+
+/* Input border radius */
+input,
+textarea,
+select {
+  border-radius: 0.375rem !important;
+  /* 6px - equivalent to rounded-md */
+}

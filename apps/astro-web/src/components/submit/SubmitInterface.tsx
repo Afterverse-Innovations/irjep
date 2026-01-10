@@ -85,7 +85,7 @@ function SubmitInterfaceInner() {
     if (!isSignedIn) {
         return (
             <div className="max-w-2xl mx-auto py-16 text-center">
-                <div className="bg-white border border-stone-100 p-12 md:p-20 rounded-[3rem] shadow-2xl shadow-stone-200/60 relative overflow-hidden group">
+                <div className="bg-white border border-stone-100 p-12 md:p-20 rounded-lg shadow-2xl shadow-stone-200/60 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl transition-transform duration-1000 group-hover:scale-110"></div>
                     <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-stone-100/50 rounded-full blur-3xl"></div>
 
@@ -120,7 +120,7 @@ function SubmitInterfaceInner() {
                 <p className="text-stone-500 mt-4 max-w-xl mx-auto font-medium">Please provide the details of your research paper. Ensure your document follows the <a href="/author-guidelines" className="text-emerald-600 hover:underline">journal guidelines</a>.</p>
             </div>
 
-            <div className="bg-white p-10 rounded-[2.5rem] border border-stone-100 shadow-xl shadow-stone-200/50">
+            <div className="bg-white p-10 rounded-lg border border-stone-100 shadow-xl shadow-stone-200/50">
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
                         <FormField

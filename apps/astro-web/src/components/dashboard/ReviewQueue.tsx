@@ -44,7 +44,7 @@ function ReviewQueueInner() {
                 <p className="text-stone-500 font-medium tracking-wide">Evaluate and manage incoming research papers.</p>
             </div>
 
-            <div className="bg-white rounded-[2rem] border border-stone-100 shadow-sm overflow-hidden p-2">
+            <div className="bg-white rounded-lg border border-stone-100 shadow-sm overflow-hidden p-2">
                 <Table>
                     <TableHeader className="bg-stone-50/50">
                         <TableRow className="border-none hover:bg-transparent">

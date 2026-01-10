@@ -28,13 +28,13 @@ function SubmissionsListInner() {
                     <p className="text-stone-500 font-medium tracking-wide">Track and manage your research papers in the pipeline.</p>
                 </div>
                 <Link href="/submit">
-                    <Button className="rounded-xl h-11 px-6 bg-stone-900 group">
+                    <Button className="rounded-lg h-11 px-6 bg-stone-900 group">
                         <Plus size={18} className="mr-2 group-hover:rotate-90 transition-transform duration-300" /> New Submission
                     </Button>
                 </Link>
             </div>
 
-            <div className="bg-white rounded-[2rem] border border-stone-100 shadow-sm overflow-hidden p-2">
+            <div className="bg-white rounded-lg border border-stone-100 shadow-sm overflow-hidden p-2">
                 <Table>
                     <TableHeader className="bg-stone-50/50">
                         <TableRow className="border-none hover:bg-transparent">
