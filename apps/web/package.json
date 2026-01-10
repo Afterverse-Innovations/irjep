@@ -5,10 +5,7 @@
     "scripts": {
         "dev": "next dev",
         "convex:dev": "convex dev",
-        "build": "next build && opennextjs-cloudflare build",
-        "build:cf": "opennextjs-cloudflare build",
-        "preview": "wrangler dev",
-        "deploy": "wrangler deploy",
+        "build": "next build",
         "start": "next start",
         "lint": "eslint",
         "codegen": "convex codegen"
