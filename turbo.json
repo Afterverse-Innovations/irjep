@@ -12,8 +12,7 @@
         },
         "build": {
             "dependsOn": [
-                "^build",
-                "codegen"
+                "^build"
             ],
             "outputs": [
                 ".next/**",
