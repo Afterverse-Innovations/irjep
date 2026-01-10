@@ -7,6 +7,9 @@ dist/
 
 # Dependencies
 node_modules/
+apps/web/node_modules/
+apps/web/.open-next/*
+!apps/web/.open-next/worker.js
 .pnp
 .pnp.*
 .yarn/*

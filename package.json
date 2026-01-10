@@ -8,16 +8,15 @@
   ],
   "scripts": {
     "build": "turbo run build --filter=web",
-    "build:web": "cd apps/web && npx @cloudflare/next-on-pages",
     "dev": "turbo dev convex:dev",
     "lint": "turbo lint",
     "clean": "turbo clean",
-    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
+    "preview": "npm run preview -w web",
+    "deploy": "npm run deploy -w web",
+    "cf-typegen": "npm run cf-typegen -w web"
   },
   "devDependencies": {
-    "@cloudflare/next-on-pages": "^1.13.16",
+    "@opennextjs/cloudflare": "latest",
     "turbo": "^2.7.3",
     "wrangler": "^4.58.0"
   }
