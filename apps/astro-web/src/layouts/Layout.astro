@@ -1,6 +1,7 @@
 ---
 import "../styles/globals.css";
 import { Toaster } from "sonner";
+import { ViewTransitions } from 'astro:transitions';
 
 interface Props {
 	title?: string;
@@ -25,6 +26,7 @@ const {
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+		<ViewTransitions />
 	</head>
 	<body class="font-sans antialiased bg-stone-50 text-stone-900">
 		<slot />
