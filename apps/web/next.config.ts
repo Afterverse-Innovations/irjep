@@ -3,14 +3,15 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: "standalone",
 
+  // ✅ REQUIRED for npm monorepo + Cloudflare Pages
   turbopack: {
-    // 👇 THIS FIXES THE ERROR
     root: __dirname,
   },
 
+  // ✅ REQUIRED on Cloudflare Pages
   images: {
-    unoptimized: true
-  }
+    unoptimized: true,
+  },
   /* config options here */
 };
 
