@@ -6,7 +6,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 Read the documentation at https://opennext.js.org/cloudflare.
 
-## Develop
+## Develop 
 
 Run the Next.js development server:
 
