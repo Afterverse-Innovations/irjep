@@ -14,7 +14,7 @@ function HeaderInner() {
                 </Link>
 
                 <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
-                    <Link href="/about" className="hover:text-primary transition-colors">About1</Link>
+                    <Link href="/about" className="hover:text-primary transition-colors">About</Link>
                     <Link href="/aim-scope" className="hover:text-primary transition-colors">Aim & Scope</Link>
                     <Link href="/issues" className="hover:text-primary transition-colors">Issues</Link>
                     <Link href="/editorial-board" className="hover:text-primary transition-colors">Editorial Board</Link>
