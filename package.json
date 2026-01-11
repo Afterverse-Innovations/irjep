@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "build": "turbo build",
-    "dev": "turbo dev",
+    "dev": "turbo dev convex:dev",
     "lint": "turbo lint",
     "clean": "turbo clean",
     "convex:dev": "convex dev",
