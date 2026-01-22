@@ -1,4 +1,5 @@
 "use client"
+import "sonner/dist/styles.css"
 
 import {
   CircleCheckIcon,
