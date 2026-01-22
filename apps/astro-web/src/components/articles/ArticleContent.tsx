@@ -93,8 +93,30 @@ function ArticleContentInner({ id }: { id: string }) {
                         <Download size={16} className="mr-2" /> Download PDF
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => {
-                        navigator.clipboard.writeText(window.location.href);
-                        toast.success("Link copied to clipboard");
+                        console.log("ArticleContent: Share button clicked");
+                        const url = window.location.href;
+                        if (navigator.clipboard && navigator.clipboard.writeText) {
+                            navigator.clipboard.writeText(url).then(() => {
+                                toast.success("Link copied to clipboard");
+                            }).catch(err => {
+                                console.error("Clipboard error:", err);
+                                toast.error("Could not copy link automatically");
+                            });
+                        } else {
+                            // Fallback for non-secure contexts or old browsers
+                            const textArea = document.createElement("textarea");
+                            textArea.value = url;
+                            document.body.appendChild(textArea);
+                            textArea.select();
+                            try {
+                                document.execCommand('copy');
+                                toast.success("Link copied to clipboard");
+                            } catch (err) {
+                                console.error("Fallback copy error:", err);
+                                toast.error("Please copy the URL from your browser address bar");
+                            }
+                            document.body.removeChild(textArea);
+                        }
                     }}>
                         <Share2 size={16} className="mr-2" /> Share
                     </Button>
