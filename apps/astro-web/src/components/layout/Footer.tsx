@@ -6,7 +6,7 @@ export function Footer() {
             <div className="container mx-auto py-10 px-4 md:px-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     <div className="space-y-4">
-                        <h3 className="text-xl font-serif font-bold text-stone-900">IRJEP</h3>
+                        <img src="/logo.png" alt="IRJEP Logo" className="h-14 w-auto" />
                         <p className="text-sm leading-relaxed">
                             International Research Journal of Ethnomedicine and Practices.<br />
                             Dedicated to the scientific study of traditional knowledge systems.

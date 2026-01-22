@@ -33,7 +33,10 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
         <div className="flex h-screen bg-stone-50 overflow-hidden">
             <aside className="w-64 border-r border-stone-100 bg-white p-6 hidden md:flex flex-col overflow-y-auto">
                 <div className="mb-10">
-                    <Link href="/" className="font-serif text-2xl font-bold tracking-tight text-stone-900">IRJEP</Link>
+                    <Link href="/" className="flex items-center gap-2">
+                        <img src="/logo.png" alt="IRJEP Logo" className="h-10 w-auto" />
+                        <span className="font-serif text-xl font-bold tracking-tight text-stone-900">IRJEP</span>
+                    </Link>
                     <div className="text-[10px] font-bold text-emerald-600 uppercase tracking-[0.2em] mt-2">Editorial Portal</div>
                 </div>
 
