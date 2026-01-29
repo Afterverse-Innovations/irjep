@@ -60,7 +60,15 @@ function SearchInterfaceInner() {
                                     </div>
                                     <div className="flex flex-col gap-3 pt-6 border-t border-stone-50">
                                         <div className="text-[10px] text-stone-400 flex flex-wrap gap-2 items-center font-medium">
-                                            <span className="text-stone-900">By {article.authors?.join(", ")}</span>
+                                            <span className="text-stone-900">
+                                                By {article.authorId ? (
+                                                    <Link href={`/author/${article.authorId}`} className="hover:text-emerald-700 hover:underline transition-colors">
+                                                        {article.authors?.join(", ")}
+                                                    </Link>
+                                                ) : (
+                                                    article.authors?.join(", ")
+                                                )}
+                                            </span>
                                             <span>•</span>
                                             <span className="truncate">{article.issueTitle || "Latest Research"}</span>
                                         </div>

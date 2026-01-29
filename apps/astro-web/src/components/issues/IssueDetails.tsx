@@ -60,25 +60,31 @@ function IssueDetailsInner({ id }: { id: string }) {
                     <div className="space-y-6">
                         {articles.map((article: any) => (
                             <div key={article._id} className="group relative bg-white border border-stone-100 p-8 rounded-2xl hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                                <Link href={`/articles/${article._id}`} className="block">
-                                    <div className="flex flex-col gap-2">
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full uppercase tracking-widest">Research Paper</span>
-                                            {article.pageRange && (
-                                                <span className="text-[10px] text-stone-400 font-mono">pp. {article.pageRange}</span>
-                                            )}
-                                        </div>
-                                        <h3 className="text-xl font-serif font-bold text-stone-900 group-hover:text-emerald-700 transition-colors leading-snug">
-                                            {article.title}
-                                        </h3>
-                                        <div className="flex items-center gap-2 mt-2">
-                                            <User size={12} className="text-stone-400" />
-                                            <span className="text-xs text-stone-600 font-medium">
-                                                {article.authors?.join(", ")}
-                                            </span>
-                                        </div>
+                                <div className="flex flex-col gap-2">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full uppercase tracking-widest">Research Paper</span>
+                                        {article.pageRange && (
+                                            <span className="text-[10px] text-stone-400 font-mono">pp. {article.pageRange}</span>
+                                        )}
                                     </div>
-                                </Link>
+                                    <h3 className="text-xl font-serif font-bold text-stone-900 group-hover:text-emerald-700 transition-colors leading-snug">
+                                        <Link href={`/articles/${article._id}`}>
+                                            {article.title}
+                                        </Link>
+                                    </h3>
+                                    <div className="flex items-center gap-2 mt-2">
+                                        <User size={12} className="text-stone-400" />
+                                        <span className="text-xs text-stone-600 font-medium">
+                                            {article.authorId ? (
+                                                <Link href={`/author/${article.authorId}`} className="hover:text-emerald-700 hover:underline transition-colors">
+                                                    {article.authors?.join(", ")}
+                                                </Link>
+                                            ) : (
+                                                article.authors?.join(", ")
+                                            )}
+                                        </span>
+                                    </div>
+                                </div>
                                 <div className="mt-6 flex gap-6 border-t border-stone-50 pt-4 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <Link href={`/articles/${article._id}`} className="text-[10px] font-bold text-stone-900 uppercase tracking-widest hover:text-emerald-700 transition-colors">
                                         Abstract

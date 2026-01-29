@@ -75,7 +75,15 @@ function ArticleContentInner({ id }: { id: string }) {
                 <div className="flex flex-wrap items-center gap-6 text-sm text-stone-600 mb-8 pb-8 border-b border-stone-100">
                     <div className="flex items-center gap-2">
                         <User size={16} className="text-stone-400" />
-                        <span className="font-medium text-stone-900">{article.authors?.join(", ")}</span>
+                        <span className="font-medium text-stone-900">
+                            {article.authorId ? (
+                                <Link href={`/author/${article.authorId}`} className="hover:text-emerald-700 hover:underline transition-colors">
+                                    {article.authors?.join(", ")}
+                                </Link>
+                            ) : (
+                                article.authors?.join(", ")
+                            )}
+                        </span>
                     </div>
                     <div className="flex items-center gap-2">
                         <Calendar size={16} className="text-stone-400" />

@@ -49,10 +49,21 @@ export const getPendingSubmissions = query({
     args: {},
     handler: async (ctx: any) => {
         // In production, check if caller is Editor or Admin
-        return await ctx.db
+        const submissions = await ctx.db
             .query("submissions")
             .withIndex("by_status", (q: any) => q.eq("status", "submitted"))
             .collect();
+
+        const results = await Promise.all(submissions.map(async (sub: any) => {
+            const user = await ctx.db.get(sub.authorId);
+            return {
+                ...sub,
+                authorName: user?.name,
+                authorId: user?._id,
+            };
+        }));
+
+        return results;
     },
 });
 

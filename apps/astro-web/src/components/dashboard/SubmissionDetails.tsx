@@ -67,7 +67,15 @@ function SubmissionDetailsInner({ id }: SubmissionDetailsProps) {
                         </div>
                         <div>
                             <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Author</p>
-                            <p className="text-stone-900 font-medium">{author?.name || "Loading..."}</p>
+                            <p className="text-stone-900 font-medium truncate">
+                                {submission.authorId ? (
+                                    <Link href={`/author/${submission.authorId}`} className="hover:text-emerald-700 hover:underline transition-colors">
+                                        {author?.name || "Loading..."}
+                                    </Link>
+                                ) : (
+                                    author?.name || "Loading..."
+                                )}
+                            </p>
                         </div>
                     </div>
 

@@ -26,6 +26,7 @@ export const getArticleById = query({
             abstract: submission?.abstract,
             keywords: submission?.keywords,
             fileId: submission?.fileId,
+            authorId: submission?.authorId,
             issueTitle: issue?.title,
             issueVolume: issue?.volume,
             issueNumber: issue?.issueNumber,
@@ -43,7 +44,11 @@ export const getLatestArticles = query({
 
         const results = await Promise.all(articles.map(async (art: any) => {
             const sub = await ctx.db.get(art.submissionId);
-            return { ...art, abstract: sub?.abstract };
+            return {
+                ...art,
+                abstract: sub?.abstract,
+                authorId: sub?.authorId
+            };
         }));
 
         return results;
@@ -73,10 +78,20 @@ export const trackDownload = mutation({
 export const getArticlesByIssue = query({
     args: { issueId: v.id("issues") },
     handler: async (ctx: any, args: any) => {
-        return await ctx.db
+        const articles = await ctx.db
             .query("articles")
             .withIndex("by_issue", (q: any) => q.eq("issueId", args.issueId))
             .collect();
+
+        const results = await Promise.all(articles.map(async (art: any) => {
+            const sub = await ctx.db.get(art.submissionId);
+            return {
+                ...art,
+                authorId: sub?.authorId,
+            };
+        }));
+
+        return results;
     },
 });
 
@@ -146,7 +161,11 @@ export const search = query({
 
         const results = await Promise.all(articles.map(async (art: any) => {
             const sub = await ctx.db.get(art.submissionId);
-            return { ...art, abstract: sub?.abstract };
+            return {
+                ...art,
+                abstract: sub?.abstract,
+                authorId: sub?.authorId
+            };
         }));
 
         return results;

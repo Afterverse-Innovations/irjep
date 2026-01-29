@@ -75,7 +75,13 @@ function ReviewQueueInner() {
                                             <Link href={`/dashboard/submissions/${sub._id}`}>
                                                 <span className="text-stone-900 font-serif font-bold text-lg leading-snug group-hover:text-emerald-700 transition-colors line-clamp-2">{sub.title}</span>
                                             </Link>
-                                            <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Initial Submission</span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Initial Submission</span>
+                                                <span className="text-[10px] text-stone-300">•</span>
+                                                <Link href={`/author/${sub.authorId}`} className="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 uppercase tracking-widest hover:underline transition-colors">
+                                                    {sub.authorName}
+                                                </Link>
+                                            </div>
                                         </div>
                                     </TableCell>
                                     <TableCell className="align-top py-6 px-6">
