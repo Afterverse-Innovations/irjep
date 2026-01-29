@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, CheckCircle, XCircle, Clock, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { Link } from "@/components/ui/link";
 import { withConvex } from "@/components/ConvexClientProvider";
 
 function ReviewQueueInner() {
@@ -71,7 +72,9 @@ function ReviewQueueInner() {
                                 <TableRow key={sub._id} className="hover:bg-stone-50/50 border-stone-50 transition-all duration-300 group">
                                     <TableCell className="font-medium align-top py-6 px-6">
                                         <div className="flex flex-col gap-1.5">
-                                            <span className="text-stone-900 font-serif font-bold text-lg leading-snug group-hover:text-emerald-700 transition-colors line-clamp-2">{sub.title}</span>
+                                            <Link href={`/dashboard/submissions/${sub._id}`}>
+                                                <span className="text-stone-900 font-serif font-bold text-lg leading-snug group-hover:text-emerald-700 transition-colors line-clamp-2">{sub.title}</span>
+                                            </Link>
                                             <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Initial Submission</span>
                                         </div>
                                     </TableCell>

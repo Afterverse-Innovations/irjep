@@ -88,3 +88,10 @@ export const getAcceptedSubmissions = query({
             .collect();
     },
 });
+
+export const getById = query({
+    args: { id: v.id("submissions") },
+    handler: async (ctx: any, args: any) => {
+        return await ctx.db.get(args.id);
+    },
+});

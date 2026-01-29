@@ -14,7 +14,7 @@ function ArticleContentInner({ id }: { id: string }) {
     const trackView = useMutation(api.articles.trackView);
     const trackDownload = useMutation(api.articles.trackDownload);
     const latestArticles = useQuery(api.articles.getLatestArticles);
-    const fileUrl = useQuery(api.files.getUrl, article?.fileId ? { storageId: article.fileId } : "skip" as any);
+    const fileUrl = useQuery(api.files.getUrl, article?.fileId ? { storageId: article.fileId } : undefined);
 
     useEffect(() => {
         if (article?._id) {
@@ -22,9 +22,10 @@ function ArticleContentInner({ id }: { id: string }) {
         }
     }, [article?._id, trackView]);
 
-    const handleDownload = async () => {
+    const handleDownload = () => {
         if (article?._id && fileUrl) {
-            await trackDownload({ articleId: article._id });
+            // Track download asynchronously (don't await to avoid popup blockers)
+            trackDownload({ articleId: article._id }).catch(err => console.error("Tracking error:", err));
             window.open(fileUrl, "_blank");
         } else {
             toast.error("File not available for download.");
@@ -89,8 +90,21 @@ function ArticleContentInner({ id }: { id: string }) {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                    <Button size="sm" className="bg-stone-900" onClick={handleDownload} disabled={!fileUrl}>
-                        <Download size={16} className="mr-2" /> Download PDF
+                    <Button
+                        size="sm"
+                        className="bg-stone-900 text-white hover:bg-stone-800"
+                        onClick={handleDownload}
+                        disabled={!article.fileId || (article.fileId && !fileUrl)}
+                    >
+                        {article.fileId && !fileUrl ? (
+                            <>
+                                <Loader2 size={16} className="mr-2 animate-spin" /> Fetching PDF...
+                            </>
+                        ) : (
+                            <>
+                                <Download size={16} className="mr-2" /> Download PDF
+                            </>
+                        )}
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => {
                         console.log("ArticleContent: Share button clicked");

@@ -1,0 +1,16 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import { SubmissionDetails } from "@/components/dashboard/SubmissionDetails";
+
+export const prerender = false;
+
+const { id } = Astro.params;
+
+if (!id) {
+    return Astro.redirect("/404");
+}
+---
+
+<DashboardLayout title="Submission Details | IRJEP Dashboard">
+    <SubmissionDetails client:load id={id} />
+</DashboardLayout>
