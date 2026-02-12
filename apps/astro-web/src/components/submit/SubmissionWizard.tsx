@@ -146,6 +146,8 @@ function SubmissionWizardInner() {
     };
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
+        if (step !== 3) return;
+
         if (!copyrightFile || !manuscriptFile) {
             toast.error("Please upload both Copyright Form and Manuscript.");
             return;
@@ -514,11 +516,11 @@ function SubmissionWizardInner() {
                         ) : <div />}
 
                         {step < 3 ? (
-                            <Button type="button" onClick={nextStep} className="h-12 px-8 rounded-lg bg-stone-900 text-white font-bold tracking-widest text-sm group transition-all">
+                            <Button key="next-button" type="button" onClick={nextStep} className="h-12 px-8 rounded-lg bg-stone-900 text-white font-bold tracking-widest text-sm group transition-all">
                                 Next Phase <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                             </Button>
                         ) : (
-                            <Button type="submit" disabled={isSubmitting} className="h-12 px-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold tracking-[0.2em] uppercase text-sm shadow-md shadow-emerald-100">
+                            <Button key="submit-button" type="submit" disabled={isSubmitting} className="h-12 px-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold tracking-[0.2em] uppercase text-sm shadow-md shadow-emerald-100">
                                 {isSubmitting ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Finalizing...
