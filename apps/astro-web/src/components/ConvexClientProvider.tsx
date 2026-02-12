@@ -5,6 +5,8 @@ import { useAuth } from "@clerk/astro/react";
 
 const convex = new ConvexReactClient(import.meta.env.PUBLIC_CONVEX_URL || "https://mock-url.convex.cloud");
 
+import { UserSync } from "./auth/UserSync";
+
 // Convex provider that uses Astro's Clerk integration
 export default function ConvexClientProvider({
     children,
@@ -13,6 +15,7 @@ export default function ConvexClientProvider({
 }) {
     return (
         <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+            <UserSync />
             {children}
         </ConvexProviderWithClerk>
     );
