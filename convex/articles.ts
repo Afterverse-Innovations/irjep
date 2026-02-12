@@ -30,6 +30,7 @@ export const getArticleById = query({
             issueTitle: issue?.title,
             issueVolume: issue?.volume,
             issueNumber: issue?.issueNumber,
+            isIssuePublished: issue?.isPublished,
         };
     },
 });
@@ -40,16 +41,21 @@ export const getLatestArticles = query({
         const articles = await ctx.db
             .query("articles")
             .order("desc")
-            .take(10);
+            .collect();
 
-        const results = await Promise.all(articles.map(async (art: any) => {
-            const sub = await ctx.db.get(art.submissionId);
-            return {
-                ...art,
-                abstract: sub?.abstract,
-                authorId: sub?.authorId
-            };
-        }));
+        const results = [];
+        for (const art of articles) {
+            const issue = await ctx.db.get(art.issueId);
+            if (issue?.isPublished) {
+                const sub = await ctx.db.get(art.submissionId);
+                results.push({
+                    ...art,
+                    abstract: sub?.abstract,
+                    authorId: sub?.authorId
+                });
+            }
+            if (results.length >= 10) break;
+        }
 
         return results;
     },
@@ -78,6 +84,9 @@ export const trackDownload = mutation({
 export const getArticlesByIssue = query({
     args: { issueId: v.id("issues") },
     handler: async (ctx: any, args: any) => {
+        const issue = await ctx.db.get(args.issueId);
+        if (!issue?.isPublished) return [];
+
         const articles = await ctx.db
             .query("articles")
             .withIndex("by_issue", (q: any) => q.eq("issueId", args.issueId))
@@ -157,17 +166,21 @@ export const search = query({
         const articles = await ctx.db
             .query("articles")
             .withSearchIndex("search_title", (q: any) => q.search("title", args.query))
-            .take(20);
+            .take(50);
 
-        const results = await Promise.all(articles.map(async (art: any) => {
-            const sub = await ctx.db.get(art.submissionId);
-            return {
-                ...art,
-                abstract: sub?.abstract,
-                authorId: sub?.authorId
-            };
-        }));
+        const results = [];
+        for (const art of articles) {
+            const issue = await ctx.db.get(art.issueId);
+            if (issue?.isPublished) {
+                const sub = await ctx.db.get(art.submissionId);
+                results.push({
+                    ...art,
+                    abstract: sub?.abstract,
+                    authorId: sub?.authorId
+                });
+            }
+        }
 
-        return results;
+        return results.slice(0, 20);
     },
 });

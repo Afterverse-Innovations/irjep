@@ -6,8 +6,9 @@ export const generateUploadUrl = mutation(async (ctx: any) => {
 });
 
 export const getUrl = query({
-    args: { storageId: v.string() },
+    args: { storageId: v.optional(v.string()) },
     handler: async (ctx: any, args: any) => {
+        if (!args.storageId) return null;
         return await ctx.storage.getUrl(args.storageId);
     },
 });
