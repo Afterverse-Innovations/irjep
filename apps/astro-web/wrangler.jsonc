@@ -36,8 +36,8 @@
 	 * https://developers.cloudflare.com/workers/configuration/secrets/
 	 */
 	"vars": {
-		"PUBLIC_CONVEX_URL": "https://flippant-fox-487.convex.cloud",
-		"CONVEX_DEPLOYMENT": "dev:flippant-fox-487"
+		// "PUBLIC_CONVEX_URL": "https://flippant-fox-487.convex.cloud",
+		// "CONVEX_DEPLOYMENT": "dev:flippant-fox-487"
 	}
 	/**
 	 * Service Bindings (communicate between multiple Workers)
