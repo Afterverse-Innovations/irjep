@@ -8,10 +8,12 @@
   ],
   "scripts": {
     "build": "turbo build",
-    "dev": "turbo dev convex:dev",
+    "dev": "node scripts/dev.mjs dev && turbo dev convex:dev",
+    "dev:prod": "node scripts/dev.mjs prod && turbo dev:prod convex:prod",
     "lint": "turbo lint",
     "clean": "turbo clean",
     "convex:dev": "convex dev",
+    "convex:prod": "convex deploy",
     "astro:dev": "npm run dev -w astro-web",
     "codegen": "convex codegen"
   },

@@ -4,7 +4,9 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
+    "dev:prod": "astro dev --mode production",
     "convex:dev": "cd ../.. && npx convex dev",
+    "convex:prod": "cd ../.. && npx convex deploy",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro"
