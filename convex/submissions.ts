@@ -6,17 +6,37 @@ export const create = mutation({
     args: {
         title: v.string(),
         abstract: v.string(),
-        fileId: v.optional(v.string()),
+        articleType: v.string(),
+        correspondingAuthor: v.object({
+            name: v.string(),
+            address: v.string(),
+            email: v.string(),
+            phone: v.string(),
+        }),
+        researchAuthors: v.array(
+            v.object({
+                name: v.string(),
+                affiliation: v.string(),
+            })
+        ),
+        keywords: v.array(v.string()),
+        copyrightFileId: v.string(),
+        manuscriptFileId: v.string(),
     },
-    handler: async (ctx: any, args: any) => {
+    handler: async (ctx, args) => {
         const user = await getCurrentUser(ctx);
         if (!user) throw new Error("Unauthorized");
 
         return await ctx.db.insert("submissions", {
             title: args.title,
             abstract: args.abstract,
+            articleType: args.articleType,
             authorId: user._id,
-            fileId: args.fileId,
+            correspondingAuthor: args.correspondingAuthor,
+            researchAuthors: args.researchAuthors,
+            keywords: args.keywords,
+            copyrightFileId: args.copyrightFileId,
+            manuscriptFileId: args.manuscriptFileId,
             status: "submitted",
             version: 1,
             createdAt: Date.now(),
@@ -27,34 +47,33 @@ export const create = mutation({
 
 export const getMySubmissions = query({
     args: {},
-    handler: async (ctx: any) => {
+    handler: async (ctx) => {
         const identity = await ctx.auth.getUserIdentity();
         if (!identity) return [];
 
         const user = await ctx.db
             .query("users")
-            .withIndex("by_clerkId", (q: any) => q.eq("clerkId", identity.subject))
+            .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
             .first();
 
         if (!user) return [];
 
         return await ctx.db
             .query("submissions")
-            .withIndex("by_author", (q: any) => q.eq("authorId", user._id))
+            .withIndex("by_author", (q) => q.eq("authorId", user._id))
             .collect();
     },
 });
 
 export const getPendingSubmissions = query({
     args: {},
-    handler: async (ctx: any) => {
-        // In production, check if caller is Editor or Admin
+    handler: async (ctx) => {
         const submissions = await ctx.db
             .query("submissions")
-            .withIndex("by_status", (q: any) => q.eq("status", "submitted"))
+            .withIndex("by_status", (q) => q.eq("status", "submitted"))
             .collect();
 
-        const results = await Promise.all(submissions.map(async (sub: any) => {
+        const results = await Promise.all(submissions.map(async (sub) => {
             const user = await ctx.db.get(sub.authorId);
             return {
                 ...sub,
@@ -77,32 +96,27 @@ export const updateStatus = mutation({
             v.literal("published")
         ),
     },
-    handler: async (ctx: any, args: any) => {
-        // In production, check auth
+    handler: async (ctx, args) => {
         await ctx.db.patch(args.submissionId, {
             status: args.status,
             updatedAt: Date.now(),
         });
-
-        if (args.status === "published") {
-            // Logic to create 'article' entry from submission would go here (now handled by articles:assignToIssue)
-        }
     },
 });
 
 export const getAcceptedSubmissions = query({
     args: {},
-    handler: async (ctx: any) => {
+    handler: async (ctx) => {
         return await ctx.db
             .query("submissions")
-            .withIndex("by_status", (q: any) => q.eq("status", "accepted"))
+            .withIndex("by_status", (q) => q.eq("status", "accepted"))
             .collect();
     },
 });
 
 export const getById = query({
     args: { id: v.id("submissions") },
-    handler: async (ctx: any, args: any) => {
+    handler: async (ctx, args) => {
         return await ctx.db.get(args.id);
     },
 });

@@ -1,13 +1,13 @@
 ---
 import PublicLayout from "@/layouts/PublicLayout.astro";
-import { SubmitInterface } from "@/components/submit/SubmitInterface";
+import { SubmissionWizard } from "@/components/submit/SubmissionWizard";
 ---
 
 <PublicLayout title="Submit Paper | IRJEP Portal">
     <div class="relative py-20 overflow-hidden bg-stone-50">
         <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
         <div class="container relative z-10 mx-auto px-4">
-            <SubmitInterface client:load />
+            <SubmissionWizard client:load />
         </div>
     </div>
 </PublicLayout>

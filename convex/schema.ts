@@ -14,8 +14,23 @@ export default defineSchema({
   submissions: defineTable({
     title: v.string(),
     abstract: v.string(),
+    articleType: v.string(),
     authorId: v.id("users"),
-    fileId: v.optional(v.string()), // Convex storage ID
+    correspondingAuthor: v.object({
+      name: v.string(),
+      address: v.string(),
+      email: v.string(),
+      phone: v.string(),
+    }),
+    researchAuthors: v.array(
+      v.object({
+        name: v.string(),
+        affiliation: v.string(),
+      })
+    ),
+    keywords: v.array(v.string()),
+    copyrightFileId: v.string(), // Convex storage ID
+    manuscriptFileId: v.string(), // Convex storage ID
     status: v.union(
       v.literal("draft"),
       v.literal("submitted"),
@@ -25,7 +40,6 @@ export default defineSchema({
       v.literal("published")
     ),
     version: v.number(),
-    keywords: v.optional(v.array(v.string())),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
