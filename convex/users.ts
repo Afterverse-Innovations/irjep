@@ -45,7 +45,7 @@ export async function getCurrentUser(ctx: any) {
 export const syncUser = mutation({
     args: {
         name: v.optional(v.string()),
-        email: v.string(),
+        email: v.optional(v.string()),
     },
     handler: async (ctx: any, args: any) => {
         const identity = await ctx.auth.getUserIdentity();
@@ -56,11 +56,14 @@ export const syncUser = mutation({
             .withIndex("by_clerkId", (q: any) => q.eq("clerkId", identity.subject))
             .first();
 
+        const name = args.name || identity.name || identity.nickname || "Scholar";
+        const email = args.email || identity.email || "no-email@provided.com";
+
         if (user) {
             // Update existing user info if needed
             await ctx.db.patch(user._id, {
-                email: args.email,
-                name: args.name || user.name,
+                email,
+                name,
             });
             return user._id;
         }
@@ -71,8 +74,8 @@ export const syncUser = mutation({
 
         return await ctx.db.insert("users", {
             clerkId: identity.subject,
-            email: args.email,
-            name: args.name,
+            email,
+            name,
             role,
         });
     },
