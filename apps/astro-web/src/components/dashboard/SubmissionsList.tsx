@@ -61,9 +61,9 @@ function SubmissionsListInner() {
                             submissions.map((sub: any) => (
                                 <TableRow key={sub._id} className="hover:bg-stone-50/50 border-stone-50 transition-all duration-300 group">
                                     <TableCell className="font-medium align-top py-6 px-6">
-                                        <div className="flex flex-col gap-1.5">
+                                        <div className="flex flex-col gap-1.5 whitespace-normal">
                                             <Link href={`/dashboard/submissions/${sub._id}`}>
-                                                <span className="text-stone-900 font-serif font-bold text-lg leading-snug group-hover:text-emerald-700 transition-colors line-clamp-2">{sub.title}</span>
+                                                <span className="text-stone-900 font-serif font-bold text-lg leading-snug group-hover:text-emerald-700 transition-colors">{sub.title}</span>
                                             </Link>
                                             <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Version {sub.version}</span>
                                         </div>

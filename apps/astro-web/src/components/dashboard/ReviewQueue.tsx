@@ -107,8 +107,8 @@ function ReviewQueueInner() {
                             {count > 0 && (
                                 <span
                                     className={`text-[9px] rounded-full px-1.5 py-0.5 leading-none ${isActive
-                                            ? "bg-white/20 text-white"
-                                            : "bg-stone-100 text-stone-400"
+                                        ? "bg-white/20 text-white"
+                                        : "bg-stone-100 text-stone-400"
                                         }`}
                                 >
                                     {count}
@@ -124,7 +124,7 @@ function ReviewQueueInner() {
                 <Table>
                     <TableHeader className="bg-stone-50/50">
                         <TableRow className="border-none hover:bg-transparent">
-                            <TableHead className="w-[400px] font-bold text-[10px] uppercase tracking-widest text-stone-400 py-4 px-6">
+                            <TableHead className="w-[450px] font-bold text-[10px] uppercase tracking-widest text-stone-400 py-4 px-6">
                                 Paper Title
                             </TableHead>
                             <TableHead className="font-bold text-[10px] uppercase tracking-widest text-stone-400 py-4 px-6">
@@ -164,11 +164,13 @@ function ReviewQueueInner() {
                                     className="hover:bg-stone-50/50 border-stone-50 transition-all duration-300 group cursor-pointer"
                                 >
                                     <TableCell className="font-medium align-top py-5 px-6">
-                                        <Link href={`/dashboard/submissions/${sub._id}`}>
-                                            <span className="text-stone-900 font-serif font-bold text-base leading-snug group-hover:text-emerald-700 transition-colors line-clamp-2">
-                                                {sub.title}
-                                            </span>
-                                        </Link>
+                                        <div className="whitespace-normal">
+                                            <Link href={`/dashboard/submissions/${sub._id}`}>
+                                                <span className="text-stone-900 font-serif font-bold text-base leading-snug group-hover:text-emerald-700 transition-colors">
+                                                    {sub.title}
+                                                </span>
+                                            </Link>
+                                        </div>
                                     </TableCell>
                                     <TableCell className="align-top py-5 px-6">
                                         <div className="flex flex-col gap-0.5">
