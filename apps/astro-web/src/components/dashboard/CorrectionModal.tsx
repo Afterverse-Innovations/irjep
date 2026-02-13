@@ -152,7 +152,7 @@ export function CorrectionModal({
                             <div className="flex items-center gap-2 bg-stone-50 rounded-lg border border-stone-200 px-3 py-2">
                                 <Paperclip size={14} className="text-stone-400 shrink-0" />
                                 <span className="text-sm text-stone-700 truncate flex-1">
-                                    {attachmentFileName}
+                                    {attachmentFileName.substring(0, 40)}
                                 </span>
                                 <button
                                     onClick={handleRemoveFile}
