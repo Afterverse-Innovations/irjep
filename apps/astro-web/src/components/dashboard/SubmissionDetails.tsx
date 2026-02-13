@@ -25,6 +25,7 @@ import {
     BookOpen,
 } from "lucide-react";
 import { Link } from "@/components/ui/link";
+import parse from 'html-react-parser';
 import { withConvex } from "@/components/ConvexClientProvider";
 
 interface SubmissionDetailsProps {
@@ -189,10 +190,8 @@ function SubmissionDetailsInner({ id }: SubmissionDetailsProps) {
                             <SectionLabel icon={<AlignLeft size={16} />}>
                                 Abstract
                             </SectionLabel>
-                            <div className="prose prose-stone max-w-none">
-                                <p className="text-stone-600 leading-relaxed font-serif text-lg italic">
-                                    {submission.abstract}
-                                </p>
+                            <div className="prose prose-stone max-w-none text-stone-600 leading-relaxed font-serif">
+                                {parse(submission.abstract || "")}
                             </div>
                         </div>
 

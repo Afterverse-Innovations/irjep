@@ -12,6 +12,7 @@ import {
     DialogFooter,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/ui/RichTextEditor";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Loader2, Upload, Paperclip, X } from "lucide-react";
@@ -134,12 +135,11 @@ export function CorrectionModal({
                         >
                             Describe your corrections *
                         </Label>
-                        <Textarea
-                            id="correction-note"
-                            placeholder="Explain the changes you've made in response to the review feedback…"
+                        <RichTextEditor
                             value={note}
-                            onChange={(e) => setNote(e.target.value)}
-                            className="min-h-[80px] max-h-[200px] overflow-y-auto resize-y rounded-lg border-stone-200 focus:border-stone-400 text-sm"
+                            onChange={setNote}
+                            placeholder="Explain the changes you've made in response to the review feedback…"
+                            minHeight="150px"
                         />
                     </div>
 

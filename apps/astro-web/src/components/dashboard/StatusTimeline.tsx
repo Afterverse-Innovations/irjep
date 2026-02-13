@@ -8,6 +8,7 @@ import { CorrectionModal } from "./CorrectionModal";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Download, Paperclip, Clock, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import parse from 'html-react-parser';
 
 interface StatusTimelineProps {
     submissionId: string;
@@ -71,14 +72,14 @@ export function StatusTimeline({
                             <div className="relative z-10 flex flex-col items-center pt-1">
                                 <div
                                     className={`w-10 h-10 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-300 ${isLatest
-                                            ? "bg-emerald-50 border-emerald-300 shadow-sm shadow-emerald-100"
-                                            : "bg-white border-stone-200"
+                                        ? "bg-emerald-50 border-emerald-300 shadow-sm shadow-emerald-100"
+                                        : "bg-white border-stone-200"
                                         }`}
                                 >
                                     <div
                                         className={`w-2.5 h-2.5 rounded-full ${isLatest
-                                                ? "bg-emerald-500"
-                                                : "bg-stone-300"
+                                            ? "bg-emerald-500"
+                                            : "bg-stone-300"
                                             }`}
                                     />
                                 </div>
@@ -90,8 +91,8 @@ export function StatusTimeline({
                             >
                                 <div
                                     className={`rounded-xl border p-5 transition-all duration-300 ${isLatest
-                                            ? "bg-white border-emerald-100 shadow-sm"
-                                            : "bg-stone-50/50 border-stone-100 hover:bg-white hover:shadow-sm"
+                                        ? "bg-white border-emerald-100 shadow-sm"
+                                        : "bg-stone-50/50 border-stone-100 hover:bg-white hover:shadow-sm"
                                         }`}
                                 >
                                     {/* Header */}
@@ -108,9 +109,9 @@ export function StatusTimeline({
                                     </div>
 
                                     {/* Note */}
-                                    <p className="text-sm text-stone-700 leading-relaxed mb-3">
-                                        {entry.note}
-                                    </p>
+                                    <div className="text-sm text-stone-700 leading-relaxed mb-3 prose prose-sm prose-stone [&>p]:mb-2 last:[&>p]:mb-0">
+                                        {parse(entry.note || "")}
+                                    </div>
 
                                     {/* Meta row */}
                                     <div className="flex flex-wrap items-center gap-3 text-[10px] text-stone-400">

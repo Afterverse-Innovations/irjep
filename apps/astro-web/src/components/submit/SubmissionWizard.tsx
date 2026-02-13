@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/ui/RichTextEditor";
 import { Badge } from "@/components/ui/badge";
 import { useMutation } from "convex/react";
 import { api } from "@local-convex/_generated/api";
@@ -70,10 +71,9 @@ const formSchema = z.object({
     // Step 2: Article Details
     articleType: z.string().min(2, "Article type is required"),
     title: z.string().min(5, "Title must be at least 5 characters"),
-    abstract: z.string().min(20, "Abstract must be at least 20 characters").refine(
-        (val) => val.split(/\s+/).filter(Boolean).length <= 300,
-        "Abstract must not exceed 300 words"
-    ),
+    abstract: z.string()
+        .refine((val) => val.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ').trim().length >= 20, "Abstract content must be at least 20 characters")
+        .refine((val) => val.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ').split(/\s+/).filter(Boolean).length <= 300, "Abstract must not exceed 300 words"),
     keywords: z.array(z.string()).min(4, "Minimum 4 keywords required").max(6, "Maximum 6 keywords allowed"),
 });
 
@@ -428,11 +428,18 @@ function SubmissionWizardInner() {
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Abstract (Max 300 words)</FormLabel>
-                                                <FormControl><Textarea placeholder="Summary of methods and results..." className="h-48 rounded-2xl border-stone-100 bg-stone-50/30 text-sm leading-relaxed py-4 px-4 resize-none focus-visible:ring-stone-200" {...field} /></FormControl>
+                                                <FormControl>
+                                                    <RichTextEditor
+                                                        value={field.value}
+                                                        onChange={field.onChange}
+                                                        placeholder="Summary of methods and results..."
+                                                        minHeight="200px"
+                                                    />
+                                                </FormControl>
                                                 <div className="flex justify-between items-center mt-2 px-1">
                                                     <FormDescription className="text-[12px] text-stone-400 font-medium">Briefly summarize objective, methodology, results and conclusion.</FormDescription>
-                                                    <span className={`text-[12px] font-bold ${field.value.split(/\s+/).filter(Boolean).length > 300 ? 'text-rose-500' : 'text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full'}`}>
-                                                        {field.value.split(/\s+/).filter(Boolean).length} / 300 words
+                                                    <span className={`text-[12px] font-bold ${field.value.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ').split(/\s+/).filter(Boolean).length > 300 ? 'text-rose-500' : 'text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full'}`}>
+                                                        {field.value.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ').split(/\s+/).filter(Boolean).length} / 300 words
                                                     </span>
                                                 </div>
                                                 <FormMessage />

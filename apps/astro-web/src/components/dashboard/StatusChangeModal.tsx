@@ -19,6 +19,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/ui/RichTextEditor";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { getStatusLabel } from "./StatusBadge";
@@ -207,12 +208,11 @@ export function StatusChangeModal({
                         >
                             Note *
                         </Label>
-                        <Textarea
-                            id="status-note"
-                            placeholder="Provide a reason or comment for this status change…"
+                        <RichTextEditor
                             value={note}
-                            onChange={(e) => setNote(e.target.value)}
-                            className="min-h-[80px] max-h-[200px] overflow-y-auto resize-y rounded-lg border-stone-200 focus:border-stone-400 text-sm"
+                            onChange={setNote}
+                            placeholder="Provide a reason or comment for this status change…"
+                            minHeight="150px"
                         />
                     </div>
 
