@@ -1,8 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@local-convex/_generated/api";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
 import { ArrowRight, Loader2, Send } from "lucide-react";
@@ -11,7 +12,19 @@ import { withConvex } from "@/components/ConvexClientProvider";
 function DashboardOverviewInner() {
     const user = useQuery(api.users.viewer);
     const submissions = useQuery(api.submissions.getMySubmissions);
-    const pending = useQuery(api.submissions.getPendingSubmissions);
+    const allSubmissions = useQuery(api.submissions.getAllSubmissions, {});
+
+    const isEditor = user?.role === "editor" || user?.role === "admin";
+
+    // Compute status counts for editors
+    const statusCounts = useMemo(() => {
+        if (!allSubmissions) return {} as Record<string, number>;
+        const counts: Record<string, number> = {};
+        for (const sub of allSubmissions) {
+            counts[sub.status] = (counts[sub.status] || 0) + 1;
+        }
+        return counts;
+    }, [allSubmissions]);
 
     if (user === undefined) {
         return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-stone-300 h-8 w-8" /></div>;
@@ -24,31 +37,42 @@ function DashboardOverviewInner() {
                 <p className="text-stone-500 font-medium tracking-wide">Welcome back, {user?.name || "Scholar"}.</p>
             </div>
 
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 <Link href="/dashboard/submissions" className="block group">
-                    <Card className="bg-white border-stone-100 shadow-sm group-hover:shadow-xl group-hover:-translate-y-1 transition-all duration-300 rounded-3xl overflow-hidden">
-                        <CardHeader className="pb-2 border-b border-stone-50">
-                            <CardTitle className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">My Submissions</CardTitle>
-                        </CardHeader>
-                        <CardContent className="pt-6">
-                            <div className="text-4xl font-serif font-bold text-stone-900 leading-none">{submissions?.length ?? 0}</div>
-                            <p className="text-[10px] text-stone-400 font-bold uppercase tracking-tighter mt-4">Lifetime research activity</p>
-                        </CardContent>
-                    </Card>
+                    <StatCard
+                        label="My Submissions"
+                        value={submissions?.length ?? 0}
+                        subtitle="Lifetime research activity"
+                    />
                 </Link>
 
-                {(user?.role === "editor" || user?.role === "admin") && (
-                    <Link href="/dashboard/queue" className="block group">
-                        <Card className="bg-white border-stone-100 shadow-sm group-hover:shadow-xl group-hover:-translate-y-1 transition-all duration-300 rounded-3xl overflow-hidden">
-                            <CardHeader className="pb-2 border-b border-stone-50">
-                                <CardTitle className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Pending Reviews</CardTitle>
-                            </CardHeader>
-                            <CardContent className="pt-6">
-                                <div className="text-4xl font-serif font-bold text-emerald-600 leading-none">{pending?.length ?? 0}</div>
-                                <p className="text-[10px] text-stone-400 font-bold uppercase tracking-tighter mt-4">Require editorial attention</p>
-                            </CardContent>
-                        </Card>
-                    </Link>
+                {isEditor && (
+                    <>
+                        <Link href="/dashboard/queue" className="block group">
+                            <StatCard
+                                label="Pending Review"
+                                value={(statusCounts["pending_for_review"] || 0) + (statusCounts["submitted"] || 0)}
+                                subtitle="Require editorial attention"
+                                accent="emerald"
+                            />
+                        </Link>
+                        <Link href="/dashboard/queue" className="block group">
+                            <StatCard
+                                label="Under Review"
+                                value={(statusCounts["under_peer_review"] || 0) + (statusCounts["correction_submitted"] || 0)}
+                                subtitle="Active peer review"
+                                accent="violet"
+                            />
+                        </Link>
+                        <Link href="/dashboard/queue" className="block group">
+                            <StatCard
+                                label="Corrections"
+                                value={statusCounts["requested_for_correction"] || 0}
+                                subtitle="Awaiting author revisions"
+                                accent="orange"
+                            />
+                        </Link>
+                    </>
                 )}
             </div>
 
@@ -69,6 +93,38 @@ function DashboardOverviewInner() {
                 </div>
             )}
         </div>
+    );
+}
+
+function StatCard({
+    label,
+    value,
+    subtitle,
+    accent,
+}: {
+    label: string;
+    value: number;
+    subtitle: string;
+    accent?: "emerald" | "violet" | "orange";
+}) {
+    const accentColors: Record<string, string> = {
+        emerald: "text-emerald-600",
+        violet: "text-violet-600",
+        orange: "text-orange-600",
+    };
+
+    return (
+        <Card className="bg-white border-stone-100 shadow-sm group-hover:shadow-xl group-hover:-translate-y-1 transition-all duration-300 rounded-3xl overflow-hidden">
+            <CardHeader className="pb-2 border-b border-stone-50">
+                <CardTitle className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">{label}</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+                <div className={`text-4xl font-serif font-bold leading-none ${accent ? accentColors[accent] : "text-stone-900"}`}>
+                    {value}
+                </div>
+                <p className="text-[10px] text-stone-400 font-bold uppercase tracking-tighter mt-4">{subtitle}</p>
+            </CardContent>
+        </Card>
     );
 }
 

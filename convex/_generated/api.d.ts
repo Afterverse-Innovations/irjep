@@ -11,7 +11,9 @@
 import type * as articles from "../articles.js";
 import type * as files from "../files.js";
 import type * as issues from "../issues.js";
+import type * as manuscriptLifecycle from "../manuscriptLifecycle.js";
 import type * as seed from "../seed.js";
+import type * as statusHistory from "../statusHistory.js";
 import type * as submissions from "../submissions.js";
 import type * as users from "../users.js";
 
@@ -25,7 +27,9 @@ declare const fullApi: ApiFromModules<{
   articles: typeof articles;
   files: typeof files;
   issues: typeof issues;
+  manuscriptLifecycle: typeof manuscriptLifecycle;
   seed: typeof seed;
+  statusHistory: typeof statusHistory;
   submissions: typeof submissions;
   users: typeof users;
 }>;

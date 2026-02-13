@@ -63,7 +63,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                             <div className="mt-10 mb-3 px-4 text-[10px] font-bold text-stone-400 uppercase tracking-[0.15em]">Editorial</div>
                             <Link href="/dashboard/queue" className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-stone-600 hover:bg-stone-50 hover:text-stone-900 transition-all duration-200">
                                 <ClipboardList size={18} className="text-stone-400" />
-                                <span>Review Queue</span>
+                                <span>All Submissions</span>
                             </Link>
                         </>
                     )}

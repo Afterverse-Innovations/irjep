@@ -3,7 +3,7 @@
 import { useQuery } from "convex/react";
 import { api } from "@local-convex/_generated/api";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "./StatusBadge";
 import { Loader2, FileText, ExternalLink, Clock, Plus } from "lucide-react";
 import { Link } from "@/components/ui/link";
 import { Button } from "@/components/ui/button";
@@ -95,23 +95,6 @@ function SubmissionsListInner() {
                 </Table>
             </div>
         </div>
-    );
-}
-
-function StatusBadge({ status }: { status: string }) {
-    const styles: Record<string, string> = {
-        draft: "bg-stone-100 text-stone-600 border-stone-200",
-        submitted: "bg-sky-50 text-sky-700 border-sky-100",
-        under_review: "bg-amber-50 text-amber-700 border-amber-100",
-        accepted: "bg-emerald-50 text-emerald-700 border-emerald-100",
-        rejected: "bg-rose-50 text-rose-700 border-rose-100",
-        published: "bg-indigo-50 text-indigo-700 border-indigo-100",
-    };
-
-    return (
-        <Badge variant="outline" className={`${styles[status] || styles.draft} font-bold text-[9px] uppercase tracking-widest py-0.5 px-2 rounded-md border shadow-none`}>
-            {status.replace("_", " ")}
-        </Badge>
     );
 }
 

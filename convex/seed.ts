@@ -1,5 +1,4 @@
 import { mutation } from "./_generated/server";
-import { v } from "convex/values";
 
 const MOCK_TITLES = [
     "Phytochemical Analysis of Ayurvedic Herbs",
@@ -57,10 +56,110 @@ const MOCK_AUTHORS = [
     "Dr. Sanjay Varma", "Maria Rossi"
 ];
 
+// Status lifecycle paths for demo data
+type SeedStatus = "pending_for_review" | "under_peer_review" | "requested_for_correction" |
+    "correction_submitted" | "accepted" | "rejected" | "pre_publication" | "published";
+
+const STATUS_PATHS: { finalStatus: SeedStatus; history: { status: string; note: string }[] }[] = [
+    // 1-4: Pending for review
+    {
+        finalStatus: "pending_for_review",
+        history: [
+            { status: "submitted", note: "Manuscript submitted by author." },
+            { status: "pending_for_review", note: "Automatically queued for editorial review." },
+        ]
+    },
+    // 5-7: Under peer review
+    {
+        finalStatus: "under_peer_review",
+        history: [
+            { status: "submitted", note: "Manuscript submitted by author." },
+            { status: "pending_for_review", note: "Automatically queued for editorial review." },
+            { status: "under_peer_review", note: "Assigned to peer reviewers for detailed evaluation." },
+        ]
+    },
+    // 8-9: Requested for correction
+    {
+        finalStatus: "requested_for_correction",
+        history: [
+            { status: "submitted", note: "Manuscript submitted by author." },
+            { status: "pending_for_review", note: "Automatically queued for editorial review." },
+            { status: "under_peer_review", note: "Assigned to peer reviewers." },
+            { status: "requested_for_correction", note: "Reviewers noted issues with methodology section. Please revise tables 3-5 and address statistical concerns." },
+        ]
+    },
+    // 10: Correction submitted
+    {
+        finalStatus: "correction_submitted",
+        history: [
+            { status: "submitted", note: "Manuscript submitted by author." },
+            { status: "pending_for_review", note: "Automatically queued for editorial review." },
+            { status: "under_peer_review", note: "Assigned to peer reviewers." },
+            { status: "requested_for_correction", note: "Minor revisions needed in the discussion section." },
+            { status: "correction_submitted", note: "All requested corrections have been addressed. Revised manuscript attached." },
+        ]
+    },
+    // 11-12: Accepted
+    {
+        finalStatus: "accepted",
+        history: [
+            { status: "submitted", note: "Manuscript submitted by author." },
+            { status: "pending_for_review", note: "Automatically queued for editorial review." },
+            { status: "under_peer_review", note: "Assigned to peer reviewers." },
+            { status: "accepted", note: "All reviewers recommend acceptance. Paper meets publication standards." },
+        ]
+    },
+    // 13-14: Rejected
+    {
+        finalStatus: "rejected",
+        history: [
+            { status: "submitted", note: "Manuscript submitted by author." },
+            { status: "pending_for_review", note: "Automatically queued for editorial review." },
+            { status: "under_peer_review", note: "Assigned to peer reviewers." },
+            { status: "rejected", note: "Manuscript does not meet the journal's scope. Authors are encouraged to submit to a more specialized journal." },
+        ]
+    },
+    // 15-17: Pre-publication
+    {
+        finalStatus: "pre_publication",
+        history: [
+            { status: "submitted", note: "Manuscript submitted by author." },
+            { status: "pending_for_review", note: "Automatically queued for editorial review." },
+            { status: "under_peer_review", note: "Assigned to peer reviewers." },
+            { status: "accepted", note: "Paper accepted for publication." },
+            { status: "pre_publication", note: "Typesetting and DOI assignment in progress." },
+        ]
+    },
+    // 18-22: Published
+    {
+        finalStatus: "published",
+        history: [
+            { status: "submitted", note: "Manuscript submitted by author." },
+            { status: "pending_for_review", note: "Automatically queued for editorial review." },
+            { status: "under_peer_review", note: "Assigned to peer reviewers." },
+            { status: "accepted", note: "Paper accepted for publication." },
+            { status: "pre_publication", note: "Typesetting and DOI assignment in progress." },
+            { status: "published", note: "Published in Volume 1. DOI assigned." },
+        ]
+    },
+];
+
+// Map each submission index to a status path
+function getStatusPath(index: number) {
+    if (index < 4) return STATUS_PATHS[0];      // pending_for_review
+    if (index < 7) return STATUS_PATHS[1];      // under_peer_review
+    if (index < 9) return STATUS_PATHS[2];      // requested_for_correction
+    if (index === 9) return STATUS_PATHS[3];    // correction_submitted
+    if (index < 12) return STATUS_PATHS[4];     // accepted
+    if (index < 14) return STATUS_PATHS[5];     // rejected
+    if (index < 17) return STATUS_PATHS[6];     // pre_publication
+    return STATUS_PATHS[7];                      // published
+}
+
 export const run = mutation({
     args: {},
     handler: async (ctx) => {
-        // 1. Create Mock Users (if they don't exist, we'll just create a few seed ones)
+        // 1. Create Mock Users
         const userIds = [];
         for (let i = 0; i < 5; i++) {
             const userId = await ctx.db.insert("users", {
@@ -73,6 +172,15 @@ export const run = mutation({
             });
             userIds.push(userId);
         }
+
+        // Create an editor user for history records
+        const editorId = await ctx.db.insert("users", {
+            clerkId: "mock_clerk_editor",
+            email: "editor@irjep.org",
+            name: "Dr. Editorial Board",
+            role: "editor",
+            institution: "IRJEP Editorial Office",
+        });
 
         // 2. Create 3 Issues
         const issue1 = await ctx.db.insert("issues", {
@@ -96,31 +204,75 @@ export const run = mutation({
             volume: 1,
             issueNumber: 3,
             publicationDate: "July - September 2025",
-            isPublished: false, // Keeping one as draft
+            isPublished: false,
         });
 
         const issues = [issue1, issue2, issue3];
 
-        // 3. Create 22 Submissions and link them as Articles
+        // 3. Create 22 Submissions with lifecycle history
         for (let i = 0; i < MOCK_TITLES.length; i++) {
             const authorId = userIds[i % userIds.length];
             const authorName = MOCK_AUTHORS[i % MOCK_AUTHORS.length];
+            const statusPath = getStatusPath(i);
 
-            // Create Submission
+            const baseTime = Date.now() - (Math.random() * 1000000000);
+
+            // Create Submission with the final status
             const submissionId = await ctx.db.insert("submissions", {
                 title: MOCK_TITLES[i],
                 abstract: MOCK_ABSTRACTS[i],
+                articleType: "Research Article",
                 authorId: authorId,
-                status: "published",
-                version: 1,
+                correspondingAuthor: {
+                    name: authorName,
+                    address: "123 University Road, Research City",
+                    email: `scholar_${i % 5}@example.com`,
+                    phone: "+91-9876543210",
+                },
+                researchAuthors: [
+                    { name: authorName, affiliation: "International Institute of Traditional Medicine" },
+                    { name: MOCK_AUTHORS[(i + 1) % MOCK_AUTHORS.length], affiliation: "Global Health Research Center" },
+                ],
                 keywords: ["Ethnomedicine", "Traditional Practice", "Research"],
-                createdAt: Date.now() - (Math.random() * 1000000000),
-                updatedAt: Date.now(),
+                copyrightFileId: "mock_copyright_file",
+                manuscriptFileId: "mock_manuscript_file",
+                status: statusPath.finalStatus,
+                version: 1,
+                createdAt: baseTime,
+                updatedAt: baseTime + (statusPath.history.length * 86400000),
             });
 
-            // Create Article for the first 15 (spread across 2 published issues)
-            if (i < 15) {
-                const issueId = issues[i % 2]; // Assign to Issue 1 or 2
+            // Insert history records
+            for (let h = 0; h < statusPath.history.length; h++) {
+                const historyEntry = statusPath.history[h];
+                const prevStatus = h > 0 ? statusPath.history[h - 1].status : undefined;
+
+                // Determine who made the change
+                let changedByUserId = editorId;
+                let changedByRole: "editor" | "author" | "system" = "editor";
+
+                if (historyEntry.status === "submitted" || historyEntry.status === "pending_for_review") {
+                    changedByUserId = authorId;
+                    changedByRole = "system";
+                } else if (historyEntry.status === "correction_submitted") {
+                    changedByUserId = authorId;
+                    changedByRole = "author";
+                }
+
+                await ctx.db.insert("manuscript_status_history", {
+                    manuscriptId: submissionId,
+                    previousStatus: prevStatus,
+                    newStatus: historyEntry.status,
+                    changedByUserId,
+                    changedByRole,
+                    note: historyEntry.note,
+                    createdAt: baseTime + (h * 86400000), // Each status change ~1 day apart
+                });
+            }
+
+            // Create Article for published submissions
+            if (statusPath.finalStatus === "published" && i >= 17) {
+                const issueId = issues[i % 2];
                 await ctx.db.insert("articles", {
                     submissionId,
                     issueId,
@@ -133,24 +285,9 @@ export const run = mutation({
                     views: Math.floor(Math.random() * 5000),
                     downloads: Math.floor(Math.random() * 1000),
                 });
-            } else if (i < 20) {
-                // Assign 5 to the draft issue (Issue 3)
-                await ctx.db.insert("articles", {
-                    submissionId,
-                    issueId: issues[2],
-                    title: MOCK_TITLES[i],
-                    authors: [authorName],
-                    pageRange: `${(i * 10) + 1}-${(i * 10) + 10}`,
-                    doi: `10.5555/irjep.2025.${i}`,
-                    publishDate: Date.now(),
-                    slug: MOCK_TITLES[i].toLowerCase().replace(/ /g, "-").replace(/[^\w-]/g, ""),
-                    views: 0,
-                    downloads: 0,
-                });
             }
-            // The remaining 2 stay as just submissions with 'published' status but no article link yet
         }
 
-        return "Successfully seeded 5 users, 3 issues, and 22 papers.";
+        return "Successfully seeded 6 users (5 authors + 1 editor), 3 issues, 22 papers across all lifecycle stages, and full status history.";
     },
 });

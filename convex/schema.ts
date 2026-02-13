@@ -32,12 +32,16 @@ export default defineSchema({
     copyrightFileId: v.string(), // Convex storage ID
     manuscriptFileId: v.string(), // Convex storage ID
     status: v.union(
-      v.literal("draft"),
       v.literal("submitted"),
-      v.literal("under_review"),
+      v.literal("pending_for_review"),
+      v.literal("under_peer_review"),
+      v.literal("requested_for_correction"),
+      v.literal("correction_submitted"),
       v.literal("accepted"),
       v.literal("rejected"),
-      v.literal("published")
+      v.literal("pre_publication"),
+      v.literal("published"),
+      v.literal("unpublished")
     ),
     version: v.number(),
     createdAt: v.number(),
@@ -80,4 +84,21 @@ export default defineSchema({
       searchField: "title",
       filterFields: ["issueId"],
     }),
+
+  manuscript_status_history: defineTable({
+    manuscriptId: v.id("submissions"),
+    previousStatus: v.optional(v.string()),
+    newStatus: v.string(),
+    changedByUserId: v.id("users"),
+    changedByRole: v.union(
+      v.literal("editor"),
+      v.literal("author"),
+      v.literal("system")
+    ),
+    note: v.string(),
+    attachmentStorageId: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_manuscript", ["manuscriptId"])
+    .index("by_changed_by", ["changedByUserId"]),
 });
