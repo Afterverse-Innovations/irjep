@@ -23,6 +23,7 @@ export interface PaperAuthor {
 export interface PaperSection {
     heading: string;
     content: string;           // HTML content
+    columns?: boolean;         // true = use template column layout, false = single column (default: true)
     subsections?: PaperSection[];
 }
 

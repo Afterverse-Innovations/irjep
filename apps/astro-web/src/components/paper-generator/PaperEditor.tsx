@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@local-convex/_generated/api";
-import { Loader2, Edit, Save, ChevronLeft, ChevronDown, Plus, Trash2 } from "lucide-react";
+import { Loader2, Edit, Save, ChevronLeft, ChevronDown, Plus, Trash2, Columns2 } from "lucide-react";
 import { toast } from "sonner";
 import { withConvex } from "@/components/ConvexClientProvider";
 import type { JournalTemplateConfig } from "@/lib/template-config";
@@ -78,9 +78,7 @@ function PaperEditorInner({ paperId }: PaperEditorProps) {
         setSaving(true);
         try {
             await updatePaper({ id: paperId as any, renderedData: editData });
-            toast.success("Paper updated");
-            setEditData(null);
-            setMode("preview");
+            toast.success("Paper saved");
         } catch (e: any) {
             toast.error(e.message || "Failed to save");
         } finally {
@@ -347,6 +345,18 @@ function PaperEditorInner({ paperId }: PaperEditorProps) {
                                                     <ChevronDown size={14} className="text-stone-400 transition-transform group-open:rotate-0 -rotate-90 shrink-0" />
                                                     <span className="text-xs font-semibold text-stone-600 flex-1">Section {i + 1}</span>
                                                     <div className="flex items-center gap-1">
+                                                        {/* Column toggle */}
+                                                        <button
+                                                            onClick={(e) => { e.preventDefault(); updateSection(i, { columns: section.columns === false ? true : false }); }}
+                                                            className={`flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded border transition-colors ${section.columns !== false
+                                                                ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                                                                : 'bg-stone-100 border-stone-200 text-stone-500'
+                                                                }`}
+                                                            title={section.columns !== false ? "Using 2-column layout" : "Using single-column layout"}
+                                                        >
+                                                            <Columns2 size={10} />
+                                                            {section.columns !== false ? '2-Col' : '1-Col'}
+                                                        </button>
                                                         <button onClick={(e) => { e.preventDefault(); moveSectionUp(i); }} disabled={i === 0}
                                                             className="text-stone-300 hover:text-stone-600 disabled:opacity-30 text-[10px] p-0.5">▲</button>
                                                         <button onClick={(e) => { e.preventDefault(); moveSectionDown(i); }} disabled={i === editData.body.length - 1}

@@ -108,11 +108,12 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
             if (section.content) {
                 // Split content at page break markers
                 const chunks = section.content.split(/<div[^>]*data-page-break[^>]*>[^<]*<\/div>/gi);
+                const sectionCols = section.columns !== false; // default true
                 chunks.forEach((chunk, ci) => {
                     const trimmed = chunk.trim();
                     if (trimmed) {
                         parts.push(
-                            <div key={`section-${i}-${ci}`} className="paper-section">
+                            <div key={`section-${i}-${ci}`} className={`paper-section${sectionCols ? '' : ' paper-section-single-col'}`}>
                                 <div className="paper-rich-content" dangerouslySetInnerHTML={{ __html: trimmed }} />
                             </div>
                         );

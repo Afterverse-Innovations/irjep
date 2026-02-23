@@ -210,6 +210,11 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
   margin-bottom: ${spacing.betweenSections}mm;
 }
 
+/* Section explicitly set to single column */
+.paper-section-single-col {
+  column-count: 1 !important;
+}
+
 /* Manual page break marker */
 .paper-page-break {
   break-before: page;
@@ -374,24 +379,50 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
 }
 
 /* Inline tables from TipTap */
-.paper-rich-content table {
-  width: 100%;
+.paper-rich-content table,
+.paper-rich-content .tiptap-table {
   border-collapse: collapse;
   margin-bottom: ${spacing.betweenParagraphs}mm;
   font-size: ${typography.tableFontSize}pt;
+  line-height: 1.1;
 }
 
 .paper-rich-content table th,
 .paper-rich-content table td {
   border: ${table.borderWidth}px solid ${table.borderColor};
-  padding: 1.5mm 2mm;
+  padding: 0.5mm 0.8mm;
   text-align: left;
+  vertical-align: top;
+  line-height: 1.1;
 }
 
 .paper-rich-content table th {
   background: ${table.headerBackgroundColor};
   color: ${table.headerTextColor};
   font-weight: bold;
+}
+
+/* Table caption from TipTap editor */
+.paper-rich-content p.table-caption,
+.paper-rich-content .table-caption {
+  text-align: center;
+  font-size: ${typography.tableFontSize}pt;
+  ${table.captionItalic ? "font-style: italic;" : ""}
+  margin: 2mm 0 1mm;
+}
+
+/* Handle table wrapper overflow */
+.paper-rich-content .tableWrapper {
+  overflow-x: auto;
+  margin: 2mm 0;
+}
+
+/* Page break in preview — invisible spacer that forces break */
+.paper-rich-content .page-break,
+.paper-rich-content div[data-page-break] {
+  height: 0;
+  border: none;
+  margin: 0;
 }
 
 /* Text alignment from TipTap */
