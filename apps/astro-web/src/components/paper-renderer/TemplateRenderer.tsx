@@ -111,34 +111,14 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
             );
         }
 
-        // Body sections
-        data.body.forEach((section, i) => {
+        // Body content (single rich-text HTML)
+        if (data.body) {
             blocks.push(
-                <div data-block={blocks.length} key={`section-${i}`} className="paper-section">
-                    <div className="paper-section-heading">{section.heading}</div>
-                    {section.content ? (
-                        <div className="paper-rich-content" dangerouslySetInnerHTML={{ __html: section.content }} />
-                    ) : (
-                        <div className="paper-paragraph" style={{ color: "#999", fontStyle: "italic" }}>
-                            [Section content not yet provided]
-                        </div>
-                    )}
-                    {section.subsections?.map((sub, j) => (
-                        <div key={j} style={{ marginTop: "3mm" }}>
-                            <div style={{
-                                fontWeight: "bold",
-                                fontSize: `${config.typography.sectionHeadingFontSize - 1}pt`,
-                            }}>
-                                {sub.heading}
-                            </div>
-                            {sub.content && (
-                                <div className="paper-rich-content" dangerouslySetInnerHTML={{ __html: sub.content }} />
-                            )}
-                        </div>
-                    ))}
+                <div data-block={blocks.length} key="body" className="paper-section">
+                    <div className="paper-rich-content" dangerouslySetInnerHTML={{ __html: data.body }} />
                 </div>
             );
-        });
+        }
 
         // Tables
         numberedTables.forEach((tbl) => {

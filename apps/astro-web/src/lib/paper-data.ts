@@ -20,12 +20,6 @@ export interface PaperAuthor {
     isCorresponding: boolean;
 }
 
-export interface PaperSection {
-    heading: string;
-    content: string;           // HTML content
-    subsections?: PaperSection[];
-}
-
 export interface PaperTable {
     number: number;
     caption: string;
@@ -84,7 +78,7 @@ export interface StructuredPaperData {
     authors: PaperAuthor[];
     abstract: string;            // HTML content
     keywords: string[];
-    body: PaperSection[];
+    body: string;                // HTML content (single rich text)
     tables: PaperTable[];
     references: PaperReference[];
     endMatter?: PaperEndMatter;
