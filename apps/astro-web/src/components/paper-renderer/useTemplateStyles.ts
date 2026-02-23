@@ -30,6 +30,11 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
   // Content area height = page height minus top/bottom margins
   const contentHeight = pageHeight - page.margins.top - page.margins.bottom;
 
+  // Content area width = page width minus left/right margins
+  const contentWidth = pageWidth - page.margins.left - page.margins.right;
+  // Single column width (for accurate block measurement)
+  const colWidth = (contentWidth - (layout.columnCount - 1) * layout.columnGap) / layout.columnCount;
+
   return `
 /* ─── Template CSS (auto-generated) ─────────────────────────── */
 
@@ -87,16 +92,25 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
   box-shadow: none !important;
 }
 
-/* Page content area fills between header and footer, clips overflow */
-.paper-page-content {
-  flex: 1;
-  overflow: hidden;
-  position: relative;
+/* Single-column measurement layout — width matches actual column width */
+.paper-body-measure {
+  column-count: 1 !important;
+  width: ${colWidth}mm;
 }
 
-/* Contains the full body content; offset via negative margin-top per page */
-.paper-page-clip {
-  position: relative;
+/* Title block: spans all columns on page 1 */
+.paper-title-block {
+  column-span: all;
+  margin-bottom: ${spacing.betweenSections}mm;
+}
+
+/* Page body: fills remaining space, left col fills before right */
+.paper-page-body {
+  column-count: var(--col-count);
+  column-gap: var(--col-gap);
+  column-fill: auto;
+  flex: 1;
+  overflow: hidden;
 }
 
 /* ─── Header ─────────────────────────────────────────────── */
