@@ -92,25 +92,33 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
   box-shadow: none !important;
 }
 
-/* Single-column measurement layout — width matches actual column width */
-.paper-body-measure {
-  column-count: 1 !important;
-  width: ${colWidth}mm;
-}
-
 /* Title block: spans all columns on page 1 */
 .paper-title-block {
-  column-span: all;
   margin-bottom: ${spacing.betweenSections}mm;
 }
 
-/* Page body: fills remaining space, left col fills before right */
-.paper-page-body {
+/* Body column layout used in measurement container */
+.paper-measure .paper-body {
   column-count: var(--col-count);
   column-gap: var(--col-gap);
-  column-fill: auto;
-  flex: 1;
+  column-fill: balance;
+}
+
+/* Clip container — fixed height per page, clips overflow */
+.paper-page-clip {
   overflow: hidden;
+  position: relative;
+  flex: 1;
+}
+
+/* Inner body — absolutely positioned, shifted upward per page */
+.paper-page-body-inner {
+  position: absolute;
+  left: 0;
+  right: 0;
+  column-count: var(--col-count);
+  column-gap: var(--col-gap);
+  column-fill: balance;
 }
 
 /* ─── Header ─────────────────────────────────────────────── */

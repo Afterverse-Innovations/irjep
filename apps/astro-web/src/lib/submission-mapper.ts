@@ -40,8 +40,8 @@ export function mapSubmissionToPaperData(submission: any): StructuredPaperData {
         ],
         abstract: submission.abstract ?? "",
         keywords: submission.keywords ?? [],
-        // Body starts empty — user writes content via rich text editor
-        body: "",
+        // Body starts empty — user adds sections freely via editor
+        body: [],
         tables: [],
         references: [],
         // Default end-matter with corresponding author pre-filled

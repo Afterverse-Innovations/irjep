@@ -1,12 +1,13 @@
 import { useState, useCallback } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@local-convex/_generated/api";
-import { Loader2, Edit, Save, ChevronLeft, Plus, Trash2 } from "lucide-react";
+import { Loader2, Edit, Save, ChevronLeft, ChevronDown, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { withConvex } from "@/components/ConvexClientProvider";
 import type { JournalTemplateConfig } from "@/lib/template-config";
 import type {
     StructuredPaperData,
+    PaperSection,
     PaperReference,
     PaperTable,
     PaperEndMatter,
@@ -48,10 +49,22 @@ function PaperEditorInner({ paperId }: PaperEditorProps) {
     }
 
     const templateConfig = paper.templateConfig as JournalTemplateConfig;
-    const paperData = (editData ?? paper.renderedData) as StructuredPaperData;
+    const rawPaperData = (editData ?? paper.renderedData) as StructuredPaperData;
+    // Normalize body for legacy data
+    const paperData: StructuredPaperData = {
+        ...rawPaperData,
+        body: Array.isArray(rawPaperData.body) ? rawPaperData.body : [],
+    };
 
     const handleStartEdit = () => {
-        setEditData(JSON.parse(JSON.stringify(paper.renderedData)));
+        const raw = JSON.parse(JSON.stringify(paper.renderedData));
+        // Normalize body: legacy data may have body as a string instead of PaperSection[]
+        if (!Array.isArray(raw.body)) {
+            raw.body = typeof raw.body === "string" && raw.body
+                ? [{ heading: "", content: raw.body }]
+                : [];
+        }
+        setEditData(raw);
         setMode("edit");
     };
 
@@ -85,7 +98,40 @@ function PaperEditorInner({ paperId }: PaperEditorProps) {
         }
     };
 
+    // ─── Section Helpers ──────────────────────────────────────
+    const addSection = () => {
+        if (!editData) return;
+        setEditData({
+            ...editData,
+            body: [...editData.body, { heading: "New Section", content: "" }],
+        });
+    };
 
+    const updateSection = (index: number, updates: Partial<PaperSection>) => {
+        if (!editData) return;
+        const newBody = [...editData.body];
+        newBody[index] = { ...newBody[index], ...updates };
+        setEditData({ ...editData, body: newBody });
+    };
+
+    const removeSection = (index: number) => {
+        if (!editData) return;
+        setEditData({ ...editData, body: editData.body.filter((_: PaperSection, i: number) => i !== index) });
+    };
+
+    const moveSectionUp = (index: number) => {
+        if (!editData || index === 0) return;
+        const newBody = [...editData.body];
+        [newBody[index - 1], newBody[index]] = [newBody[index], newBody[index - 1]];
+        setEditData({ ...editData, body: newBody });
+    };
+
+    const moveSectionDown = (index: number) => {
+        if (!editData || index >= editData.body.length - 1) return;
+        const newBody = [...editData.body];
+        [newBody[index], newBody[index + 1]] = [newBody[index + 1], newBody[index]];
+        setEditData({ ...editData, body: newBody });
+    };
 
     // ─── Reference Helpers ────────────────────────────────────
     const addReference = () => {
@@ -279,16 +325,48 @@ function PaperEditorInner({ paperId }: PaperEditorProps) {
                                         />
                                     </div>
 
-                                    {/* Body Content */}
+                                    {/* Body Sections */}
                                     <div className="pt-3 border-t border-stone-100">
-                                        <span className="text-xs font-bold text-stone-700 uppercase tracking-wider mb-2 block">Body Content</span>
-                                        <RichTextEditor
-                                            value={editData.body}
-                                            onChange={(html) => setEditData({ ...editData, body: html })}
-                                            minHeight="300px"
-                                            maxHeight="600px"
-                                            placeholder="Write the full body content of your paper here…"
-                                        />
+                                        <div className="flex items-center justify-between mb-3">
+                                            <span className="text-xs font-bold text-stone-700 uppercase tracking-wider">Body Sections</span>
+                                            <button onClick={addSection}
+                                                className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-700 font-medium">
+                                                <Plus size={12} /> Add Section
+                                            </button>
+                                        </div>
+
+                                        {editData.body.length === 0 && (
+                                            <div className="text-xs text-stone-400 text-center py-6 bg-stone-50 rounded-lg">
+                                                No sections yet. Click "Add Section" to start writing.
+                                            </div>
+                                        )}
+
+                                        {editData.body.map((section: PaperSection, i: number) => (
+                                            <details key={i} className="mb-3 bg-stone-50 rounded-xl border border-stone-100 group" open>
+                                                <summary className="flex items-center gap-2 p-3 cursor-pointer select-none list-none [&::-webkit-details-marker]:hidden">
+                                                    <ChevronDown size={14} className="text-stone-400 transition-transform group-open:rotate-0 -rotate-90 shrink-0" />
+                                                    <span className="text-xs font-semibold text-stone-600 flex-1">Section {i + 1}</span>
+                                                    <div className="flex items-center gap-1">
+                                                        <button onClick={(e) => { e.preventDefault(); moveSectionUp(i); }} disabled={i === 0}
+                                                            className="text-stone-300 hover:text-stone-600 disabled:opacity-30 text-[10px] p-0.5">▲</button>
+                                                        <button onClick={(e) => { e.preventDefault(); moveSectionDown(i); }} disabled={i === editData.body.length - 1}
+                                                            className="text-stone-300 hover:text-stone-600 disabled:opacity-30 text-[10px] p-0.5">▼</button>
+                                                        <button onClick={(e) => { e.preventDefault(); removeSection(i); }} className="text-red-400 hover:text-red-600 p-0.5 ml-1">
+                                                            <Trash2 size={12} />
+                                                        </button>
+                                                    </div>
+                                                </summary>
+                                                <div className="px-3 pb-3">
+                                                    <RichTextEditor
+                                                        value={section.content}
+                                                        onChange={(html) => updateSection(i, { content: html })}
+                                                        minHeight="120px"
+                                                        maxHeight="400px"
+                                                        placeholder={`Write section content…`}
+                                                    />
+                                                </div>
+                                            </details>
+                                        ))}
                                     </div>
                                 </>
                             )}

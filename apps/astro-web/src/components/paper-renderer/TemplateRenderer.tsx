@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, useEffect, useCallback, type ReactNode } from "react";
+import { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import type { JournalTemplateConfig } from "@/lib/template-config";
 import type { StructuredPaperData } from "@/lib/paper-data";
 import { useTemplateStyles } from "./useTemplateStyles";
@@ -19,29 +19,37 @@ interface TemplateRendererProps {
 }
 
 /**
- * Professional paginated renderer.
+ * Professional paginated renderer using a sliding-window approach.
  *
- * Approach:
- * 1. All content is split into discrete "blocks" (title, abstract, sections, etc.)
- * 2. Blocks are rendered in a hidden single-column measurement container
- *    to get their natural heights.
- * 3. Blocks are distributed greedily across pages. For multi-column layouts,
- *    each page can hold `usableHeight × columnCount` worth of single-column
- *    content because CSS columns fill horizontally first.
- * 4. Each rendered page gets its own column container (column-fill: auto)
- *    with only the blocks assigned to that page.
- * 5. Every page has its own header, footer, and page number.
+ * 1.  All body content is rendered inside a hidden measurement container
+ *     that has the real column layout applied (column-count, column-fill: balance).
+ *     Its scrollHeight tells us the total columned height of the content.
+ *
+ * 2.  We compute how many pages are needed based on:
+ *       - Page 1 body height (less — title takes space)
+ *       - Page 2+ body height (full)
+ *
+ * 3.  Each rendered page contains a clip container (overflow:hidden, fixed height)
+ *     wrapping an absolutely-positioned content div. The content div is shifted
+ *     upward by the page's offset so the correct "window" of columned content
+ *     is visible. The column layout is applied identically on every page so
+ *     left/right columns render naturally.
  */
 export function TemplateRenderer({ config, data, className = "" }: TemplateRendererProps) {
     const css = useTemplateStyles(config);
-    const measureRef = useRef<HTMLDivElement>(null);
+
+    // Measurement refs
+    const measureContainerRef = useRef<HTMLDivElement>(null);
+    const measureBodyRef = useRef<HTMLDivElement>(null);
     const measureHeaderRef = useRef<HTMLDivElement>(null);
     const measureFooterRef = useRef<HTMLDivElement>(null);
     const measureTitleRef = useRef<HTMLDivElement>(null);
 
-    // pages[i] = array of block indices assigned to page i
-    const [pages, setPages] = useState<number[][]>([[/* all on page 1 initially */]]);
-    const [measured, setMeasured] = useState(false);
+    // Pagination state
+    const [pageCount, setPageCount] = useState(1);
+    const [page1BodyH, setPage1BodyH] = useState(0);
+    const [laterBodyH, setLaterBodyH] = useState(0);
+    const [totalBodyH, setTotalBodyH] = useState(0);
 
     // ─── Token resolver ──────────────────────────────────────
     const resolveTokens = useCallback(
@@ -86,44 +94,35 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
 
     const endMatter = data.endMatter;
 
-    // ─── Build content blocks ────────────────────────────────
-    // Each block gets a stable `data-block` attr for measurement matching.
-    const contentBlocks: ReactNode[] = useMemo(() => {
-        const blocks: ReactNode[] = [];
+    // ─── Body content (rendered as HTML) ─────────────────────
+    const bodyContentJSX = useMemo(() => {
+        const parts: React.JSX.Element[] = [];
+
+        // Body sections — normalize in case legacy data has body as a string
+        const bodySections = Array.isArray(data.body)
+            ? data.body
+            : typeof data.body === "string" && data.body
+                ? [{ heading: "", content: data.body }]
+                : [];
+        bodySections.forEach((section, i) => {
+            if (section.content) {
+                parts.push(
+                    <div key={`section-${i}`} className="paper-section">
+                        <div className="paper-rich-content" dangerouslySetInnerHTML={{ __html: section.content }} />
+                    </div>
+                );
+            }
+        });
 
         // Abstract
         if (data.abstract) {
-            blocks.push(
-                <div data-block={blocks.length} key="abstract" className="paper-abstract-block">
-                    <div className="paper-abstract-label">{config.abstract.labelText}</div>
-                    <div className="paper-rich-content" dangerouslySetInnerHTML={{ __html: data.abstract }} />
-                </div>
-            );
-        }
-
-        // Keywords
-        if (data.keywords.length > 0) {
-            blocks.push(
-                <div data-block={blocks.length} key="keywords" className="paper-keywords">
-                    <span className="paper-keywords-label">Keywords: </span>
-                    {data.keywords.join(", ")}
-                </div>
-            );
-        }
-
-        // Body content (single rich-text HTML)
-        if (data.body) {
-            blocks.push(
-                <div data-block={blocks.length} key="body" className="paper-section">
-                    <div className="paper-rich-content" dangerouslySetInnerHTML={{ __html: data.body }} />
-                </div>
-            );
+            // Abstract is already rendered in the title block area, skip here
         }
 
         // Tables
         numberedTables.forEach((tbl) => {
-            blocks.push(
-                <div data-block={blocks.length} key={`table-${tbl.number}`} className="paper-table-block">
+            parts.push(
+                <div key={`table-${tbl.number}`} className="paper-table-block">
                     <div className="paper-table-caption">
                         {config.numbering.tablePrefix} {tbl.number}. {tbl.caption}
                     </div>
@@ -148,8 +147,8 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
 
         // References
         if (numberedRefs.length > 0) {
-            blocks.push(
-                <div data-block={blocks.length} key="references" className="paper-references">
+            parts.push(
+                <div key="references" className="paper-references">
                     <div className="paper-references-heading">References</div>
                     {numberedRefs.map((ref) => (
                         <div key={ref.number} className="paper-reference-item">
@@ -162,8 +161,8 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
 
         // End Matter
         if (endMatter) {
-            blocks.push(
-                <div data-block={blocks.length} key="endmatter" className="paper-endmatter">
+            parts.push(
+                <div key="endmatter" className="paper-endmatter">
                     {endMatter.contributorParticulars.length > 0 && (
                         <div className="paper-endmatter-section">
                             <div className="paper-endmatter-heading">Particulars of Contributors:</div>
@@ -240,85 +239,65 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
             );
         }
 
-        // Empty state
-        if (blocks.length === 0) {
-            blocks.push(
-                <div data-block={0} key="empty" style={{ color: "#999", fontStyle: "italic", padding: "4mm 0" }}>
-                    [No content sections added yet.]
+        if (parts.length === 0) {
+            parts.push(
+                <div key="empty" style={{ color: "#999", fontStyle: "italic", padding: "4mm 0" }}>
+                    [No content yet.]
                 </div>
             );
         }
 
-        return blocks;
+        return parts;
     }, [data, config, numberedTables, numberedRefs, endMatter]);
 
-    // ─── Measure + distribute blocks across pages ────────────
+    // ─── Measure columned content height & compute pages ─────
     useEffect(() => {
-        const container = measureRef.current;
+        const bodyEl = measureBodyRef.current;
         const headerEl = measureHeaderRef.current;
         const footerEl = measureFooterRef.current;
         const titleEl = measureTitleRef.current;
-        if (!container || !headerEl || !footerEl || !titleEl) return;
+        if (!bodyEl || !headerEl || !footerEl || !titleEl) return;
 
         const timer = setTimeout(() => {
-            // IMPORTANT: Use offsetHeight, NOT getBoundingClientRect().height.
-            // The measurement container is inside PaperPreview's transform: scale(zoom)
-            // and getBoundingClientRect returns SCALED dimensions, making everything
-            // appear to fit on one page. offsetHeight is unaffected by CSS transforms.
+            // Use offsetHeight — NOT getBoundingClientRect (which is affected by zoom transform)
             const headerH = headerEl.offsetHeight;
             const footerH = footerEl.offsetHeight;
             const titleH = titleEl.offsetHeight;
+            const bodyH = bodyEl.scrollHeight;
 
-            const totalInnerH = pageDims.heightPx - pageDims.marginTopPx - pageDims.marginBottomPx;
-            const colCount = config.layout.columnCount;
+            const totalInner = pageDims.heightPx - pageDims.marginTopPx - pageDims.marginBottomPx;
 
-            // Page 1 usable body area (less space due to title)
-            // Multiply by column count: 2 columns = 2× content height capacity
-            const page1Capacity = (totalInnerH - headerH - titleH - footerH) * colCount;
-            // Page 2+ usable body area (no title)
-            const laterCapacity = (totalInnerH - headerH - footerH) * colCount;
+            // Page 1: header + title + body + footer
+            const p1Body = Math.max(0, totalInner - headerH - titleH - footerH);
+            // Page 2+: header + body + footer (no title)
+            const pNBody = Math.max(0, totalInner - headerH - footerH);
 
-            // Measure each block at column width (single-column mode)
-            const blocks = container.querySelectorAll<HTMLElement>("[data-block]");
-            const heights: number[] = [];
-            blocks.forEach((b) => heights.push(b.offsetHeight));
-
-            // Greedy distribution
-            const pageGroups: number[][] = [];
-            let currentPage: number[] = [];
-            let currentHeight = 0;
-            let isFirstPage = true;
-
-            for (let i = 0; i < heights.length; i++) {
-                const cap = isFirstPage ? page1Capacity : laterCapacity;
-
-                if (currentHeight + heights[i] > cap && currentPage.length > 0) {
-                    // This block doesn't fit — start new page
-                    pageGroups.push(currentPage);
-                    currentPage = [i];
-                    currentHeight = heights[i];
-                    isFirstPage = false;
-                } else {
-                    currentPage.push(i);
-                    currentHeight += heights[i];
-                }
+            let pages = 1;
+            if (bodyH > p1Body && pNBody > 0) {
+                const remaining = bodyH - p1Body;
+                pages = 1 + Math.ceil(remaining / pNBody);
             }
 
-            if (currentPage.length > 0) {
-                pageGroups.push(currentPage);
-            }
-
-            // Fallback
-            if (pageGroups.length === 0) {
-                pageGroups.push(Array.from({ length: heights.length }, (_, i) => i));
-            }
-
-            setPages(pageGroups);
-            setMeasured(true);
+            setPage1BodyH(p1Body);
+            setLaterBodyH(pNBody);
+            setTotalBodyH(bodyH);
+            setPageCount(pages);
         }, 100);
 
         return () => clearTimeout(timer);
-    }, [data, config, pageDims, contentBlocks]);
+    }, [data, config, pageDims, bodyContentJSX]);
+
+    // ─── Compute offset for each page ────────────────────────
+    const getPageOffset = (pageIdx: number): number => {
+        if (pageIdx === 0) return 0;
+        // Page 1 shows page1BodyH worth of content
+        // Each subsequent page shows laterBodyH worth
+        return page1BodyH + (pageIdx - 1) * laterBodyH;
+    };
+
+    const getBodyHeight = (pageIdx: number): number => {
+        return pageIdx === 0 ? page1BodyH : laterBodyH;
+    };
 
     // ─── Header renderer ─────────────────────────────────────
     const renderHeader = (pageNum: number) => (
@@ -342,7 +321,7 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
         </div>
     );
 
-    // ─── Title block (page 1 only, spans all columns) ────────
+    // ─── Title block (page 1 only) ───────────────────────────
     const titleBlock = (
         <div className="paper-title-block">
             <div className="paper-title">{data.title || "Untitled Paper"}</div>
@@ -360,6 +339,20 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
                     {[...new Set(data.authors.map((a) => a.affiliation).filter(Boolean))].join("; ")}
                 </div>
             )}
+            {/* Abstract inside the title block (spans all columns) */}
+            {data.abstract && (
+                <div className="paper-abstract-block">
+                    <div className="paper-abstract-label">{config.abstract.labelText}</div>
+                    <div className="paper-rich-content" dangerouslySetInnerHTML={{ __html: data.abstract }} />
+                </div>
+            )}
+            {/* Keywords */}
+            {data.keywords.length > 0 && (
+                <div className="paper-keywords">
+                    <span className="paper-keywords-label">Keywords: </span>
+                    {data.keywords.join(", ")}
+                </div>
+            )}
         </div>
     );
 
@@ -368,12 +361,10 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
             <style dangerouslySetInnerHTML={{ __html: css }} />
 
             {/* ─── Hidden Measurement Container ─────────────── */}
-            {/* Single-column measurement: no CSS columns applied.
-                Blocks are measured in their natural single-column height.
-                We then multiply usable page height by column count
-                to determine how many blocks fit per page. */}
+            {/* Full-width column layout applied. scrollHeight of the body
+                div gives us the total columned content height. */}
             <div
-                ref={measureRef}
+                ref={measureContainerRef}
                 className={`paper-page paper-measure ${className}`}
                 aria-hidden="true"
                 style={{
@@ -386,34 +377,44 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
             >
                 <div ref={measureHeaderRef}>{renderHeader(1)}</div>
                 <div ref={measureTitleRef}>{titleBlock}</div>
-                {/* Blocks measured in single-column layout */}
-                <div className="paper-body-measure">
-                    {contentBlocks}
+                <div ref={measureBodyRef} className="paper-body">
+                    {bodyContentJSX}
                 </div>
                 <div ref={measureFooterRef}>{renderFooter(1, 1)}</div>
             </div>
 
             {/* ─── Rendered Pages ───────────────────────────── */}
             <div className="paper-paged-wrapper">
-                {pages.map((blockIndices, pageIdx) => (
-                    <div key={pageIdx} className={`paper-page ${className}`}>
-                        {/* Header */}
-                        {renderHeader(pageIdx + 1)}
+                {Array.from({ length: pageCount }, (_, pageIdx) => {
+                    const offset = getPageOffset(pageIdx);
+                    const bodyHeight = getBodyHeight(pageIdx);
 
-                        {/* Title block only on page 1, above columns */}
-                        {pageIdx === 0 && titleBlock}
+                    return (
+                        <div key={pageIdx} className={`paper-page ${className}`}>
+                            {/* Header */}
+                            {renderHeader(pageIdx + 1)}
 
-                        {/* Body — applies column layout to this page's blocks */}
-                        <div className="paper-body paper-page-body">
-                            {blockIndices.map((bi) => (
-                                <div key={bi}>{contentBlocks[bi]}</div>
-                            ))}
+                            {/* Title block only on page 1 */}
+                            {pageIdx === 0 && titleBlock}
+
+                            {/* Body — clip container with sliding window */}
+                            <div
+                                className="paper-page-clip"
+                                style={{ height: bodyHeight }}
+                            >
+                                <div
+                                    className="paper-body paper-page-body-inner"
+                                    style={{ top: -offset }}
+                                >
+                                    {bodyContentJSX}
+                                </div>
+                            </div>
+
+                            {/* Footer */}
+                            {renderFooter(pageIdx + 1, pageCount)}
                         </div>
-
-                        {/* Footer */}
-                        {renderFooter(pageIdx + 1, pages.length)}
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </>
     );
