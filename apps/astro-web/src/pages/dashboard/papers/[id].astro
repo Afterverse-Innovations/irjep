@@ -1,0 +1,10 @@
+---
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import PaperEditor from "../../../components/paper-generator/PaperEditor";
+
+const { id } = Astro.params;
+---
+
+<DashboardLayout>
+    <PaperEditor client:load paperId={id!} />
+</DashboardLayout>

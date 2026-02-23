@@ -101,4 +101,37 @@ export default defineSchema({
   })
     .index("by_manuscript", ["manuscriptId"])
     .index("by_changed_by", ["changedByUserId"]),
+
+  // ─── Template Builder ───────────────────────────────────────
+  // Stores journal template configurations (page layout, typography, etc.)
+  templates: defineTable({
+    name: v.string(),
+    description: v.optional(v.string()),
+    version: v.string(),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    // Full template config stored as JSON — see template-config.ts for types
+    config: v.any(),
+    isActive: v.boolean(),
+  })
+    .index("by_creator", ["createdBy"])
+    .index("by_active", ["isActive"]),
+
+  // ─── Rendered Papers ────────────────────────────────────────
+  // Stores the generated typeset paper data (template config + submission content)
+  papers: defineTable({
+    submissionId: v.id("submissions"),
+    templateId: v.id("templates"),
+    // Structured paper data stored as JSON — see paper-data.ts for types
+    renderedData: v.any(),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    status: v.union(v.literal("draft"), v.literal("final")),
+  })
+    .index("by_submission", ["submissionId"])
+    .index("by_template", ["templateId"])
+    .index("by_creator", ["createdBy"])
+    .index("by_status", ["status"]),
 });

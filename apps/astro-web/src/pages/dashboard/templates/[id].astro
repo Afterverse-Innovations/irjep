@@ -1,0 +1,10 @@
+---
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import TemplateBuilder from "../../../components/template-builder/TemplateBuilder";
+
+const { id } = Astro.params;
+---
+
+<DashboardLayout>
+    <TemplateBuilder client:load templateId={id} />
+</DashboardLayout>

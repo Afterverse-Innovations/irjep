@@ -3,7 +3,7 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@local-convex/_generated/api";
 import { UserButton, useAuth } from "@clerk/astro/react";
-import { Loader2, LayoutDashboard, Send, FileText, Users, BookOpen, ClipboardList } from "lucide-react";
+import { Loader2, LayoutDashboard, Send, FileText, Users, BookOpen, ClipboardList, Palette, FileOutput } from "lucide-react";
 import { useEffect } from "react";
 import { Link } from "@/components/ui/link";
 import { withConvex } from "@/components/ConvexClientProvider";
@@ -65,6 +65,14 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                                 <ClipboardList size={18} className="text-stone-400" />
                                 <span>All Submissions</span>
                             </Link>
+                            <Link href="/dashboard/templates" className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-stone-600 hover:bg-stone-50 hover:text-stone-900 transition-all duration-200">
+                                <Palette size={18} className="text-stone-400" />
+                                <span>Templates</span>
+                            </Link>
+                            <Link href="/dashboard/papers" className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-stone-600 hover:bg-stone-50 hover:text-stone-900 transition-all duration-200">
+                                <FileOutput size={18} className="text-stone-400" />
+                                <span>Papers</span>
+                            </Link>
                         </>
                     )}
 
@@ -95,8 +103,8 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                         <UserButton />
                     </div>
                 </header>
-                <main className="flex-1 p-8 md:p-12 overflow-y-auto">
-                    <div className="mx-auto max-w-5xl">
+                <main className="flex-1 p-6 md:p-8 overflow-y-auto">
+                    <div className="mx-auto max-w-[1600px]">
                         {children}
                     </div>
                 </main>
