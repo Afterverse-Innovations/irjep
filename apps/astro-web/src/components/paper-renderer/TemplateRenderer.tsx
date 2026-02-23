@@ -22,18 +22,17 @@ interface TemplateRendererProps {
  * Professional paginated renderer using a sliding-window approach.
  *
  * 1.  All body content is rendered inside a hidden measurement container
- *     that has the real column layout applied (column-count, column-fill: balance).
- *     Its scrollHeight tells us the total columned height of the content.
+ *     in SINGLE-COLUMN mode. Its scrollHeight gives the total linear
+ *     content height.
  *
- * 2.  We compute how many pages are needed based on:
- *       - Page 1 body height (less — title takes space)
- *       - Page 2+ body height (full)
+ * 2.  Each page's body capacity = bodyHeight × columnCount.
+ *     Page 1 has less body height (title takes space).
  *
- * 3.  Each rendered page contains a clip container (overflow:hidden, fixed height)
- *     wrapping an absolutely-positioned content div. The content div is shifted
- *     upward by the page's offset so the correct "window" of columned content
- *     is visible. The column layout is applied identically on every page so
- *     left/right columns render naturally.
+ * 3.  Each rendered page has a column container with column-fill: auto
+ *     and a fixed height = bodyHeight. Inside, the content div is shifted
+ *     upward via margin-top: -offset to skip already-shown content.
+ *     column-fill: auto ensures the left column fills completely
+ *     before content flows to the right column.
  */
 export function TemplateRenderer({ config, data, className = "" }: TemplateRendererProps) {
     const css = useTemplateStyles(config);
@@ -46,10 +45,11 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
     const measureTitleRef = useRef<HTMLDivElement>(null);
 
     // Pagination state
+    const colCount = config.layout.columnCount || 1;
     const [pageCount, setPageCount] = useState(1);
     const [page1BodyH, setPage1BodyH] = useState(0);
     const [laterBodyH, setLaterBodyH] = useState(0);
-    const [totalBodyH, setTotalBodyH] = useState(0);
+    const [columedHeight, setColumedHeight] = useState(0);
 
     // ─── Token resolver ──────────────────────────────────────
     const resolveTokens = useCallback(
@@ -106,11 +106,24 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
                 : [];
         bodySections.forEach((section, i) => {
             if (section.content) {
-                parts.push(
-                    <div key={`section-${i}`} className="paper-section">
-                        <div className="paper-rich-content" dangerouslySetInnerHTML={{ __html: section.content }} />
-                    </div>
-                );
+                // Split content at page break markers
+                const chunks = section.content.split(/<div[^>]*data-page-break[^>]*>[^<]*<\/div>/gi);
+                chunks.forEach((chunk, ci) => {
+                    const trimmed = chunk.trim();
+                    if (trimmed) {
+                        parts.push(
+                            <div key={`section-${i}-${ci}`} className="paper-section">
+                                <div className="paper-rich-content" dangerouslySetInnerHTML={{ __html: trimmed }} />
+                            </div>
+                        );
+                    }
+                    // Insert a page-break marker after each chunk (except the last)
+                    if (ci < chunks.length - 1) {
+                        parts.push(
+                            <div key={`pb-${i}-${ci}`} className="paper-page-break" data-page-break="true" />
+                        );
+                    }
+                });
             }
         });
 
@@ -263,7 +276,9 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
             const headerH = headerEl.offsetHeight;
             const footerH = footerEl.offsetHeight;
             const titleH = titleEl.offsetHeight;
-            const bodyH = bodyEl.scrollHeight;
+            // Body is measured WITH columns (column-fill: auto, large height)
+            // scrollHeight = the columed height (how tall the columns actually are)
+            const bodyScrollH = bodyEl.scrollHeight;
 
             const totalInner = pageDims.heightPx - pageDims.marginTopPx - pageDims.marginBottomPx;
 
@@ -273,25 +288,23 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
             const pNBody = Math.max(0, totalInner - headerH - footerH);
 
             let pages = 1;
-            if (bodyH > p1Body && pNBody > 0) {
-                const remaining = bodyH - p1Body;
+            if (bodyScrollH > p1Body && pNBody > 0) {
+                const remaining = bodyScrollH - p1Body;
                 pages = 1 + Math.ceil(remaining / pNBody);
             }
 
             setPage1BodyH(p1Body);
             setLaterBodyH(pNBody);
-            setTotalBodyH(bodyH);
+            setColumedHeight(bodyScrollH);
             setPageCount(pages);
         }, 100);
 
         return () => clearTimeout(timer);
     }, [data, config, pageDims, bodyContentJSX]);
 
-    // ─── Compute offset for each page ────────────────────────
+    // ─── Compute offset for each page (in columned-height terms) ─
     const getPageOffset = (pageIdx: number): number => {
         if (pageIdx === 0) return 0;
-        // Page 1 shows page1BodyH worth of content
-        // Each subsequent page shows laterBodyH worth
         return page1BodyH + (pageIdx - 1) * laterBodyH;
     };
 
@@ -377,7 +390,7 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
             >
                 <div ref={measureHeaderRef}>{renderHeader(1)}</div>
                 <div ref={measureTitleRef}>{titleBlock}</div>
-                <div ref={measureBodyRef} className="paper-body">
+                <div ref={measureBodyRef} className="paper-body paper-measure-body">
                     {bodyContentJSX}
                 </div>
                 <div ref={measureFooterRef}>{renderFooter(1, 1)}</div>
@@ -397,14 +410,14 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
                             {/* Title block only on page 1 */}
                             {pageIdx === 0 && titleBlock}
 
-                            {/* Body — clip container with sliding window */}
+                            {/* Body — clip container with absolute-positioned columned content */}
                             <div
                                 className="paper-page-clip"
                                 style={{ height: bodyHeight }}
                             >
                                 <div
-                                    className="paper-body paper-page-body-inner"
-                                    style={{ top: -offset }}
+                                    className="paper-page-body-inner"
+                                    style={{ top: -offset, height: columedHeight }}
                                 >
                                     {bodyContentJSX}
                                 </div>

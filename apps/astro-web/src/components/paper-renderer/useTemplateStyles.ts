@@ -97,28 +97,22 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
   margin-bottom: ${spacing.betweenSections}mm;
 }
 
-/* Body column layout used in measurement container */
-.paper-measure .paper-body {
-  column-count: var(--col-count);
-  column-gap: var(--col-gap);
-  column-fill: balance;
+/* Measurement body — no columns here; each section has its own columns */
+.paper-measure-body {
+  /* sections inside handle their own columns */
 }
 
 /* Clip container — fixed height per page, clips overflow */
 .paper-page-clip {
   overflow: hidden;
   position: relative;
-  flex: 1;
 }
 
-/* Inner body — absolutely positioned, shifted upward per page */
+/* Inner body — absolutely positioned, NO columns (sections handle them) */
 .paper-page-body-inner {
   position: absolute;
   left: 0;
   right: 0;
-  column-count: var(--col-count);
-  column-gap: var(--col-gap);
-  column-fill: balance;
 }
 
 /* ─── Header ─────────────────────────────────────────────── */
@@ -210,8 +204,19 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
 }
 
 .paper-section {
-  break-inside: avoid-column;
+  column-count: var(--col-count);
+  column-gap: var(--col-gap);
+  column-fill: balance;
   margin-bottom: ${spacing.betweenSections}mm;
+}
+
+/* Manual page break marker */
+.paper-page-break {
+  break-before: page;
+  page-break-before: always;
+  height: 0;
+  border: none;
+  margin: 0;
 }
 
 .paper-section-heading {

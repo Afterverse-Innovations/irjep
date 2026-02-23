@@ -17,8 +17,9 @@ import {
     AlignLeft, AlignCenter, AlignRight, AlignJustify,
     Highlighter, Subscript as SubIcon, Superscript as SupIcon,
     Table as TableIcon, Undo2, Redo2, Minus, Quote, Code,
-    Strikethrough, Plus, Trash2,
+    Strikethrough, Plus, Trash2, Scissors,
 } from 'lucide-react';
+import { PageBreak } from './PageBreakExtension';
 import { cn } from '@/lib/utils';
 import { useEffect, useCallback } from 'react';
 
@@ -58,6 +59,7 @@ export function RichTextEditor({
             TableRow,
             TableCell,
             TableHeader,
+            PageBreak,
         ],
         content: value,
         editable: !disabled,
@@ -168,6 +170,9 @@ export function RichTextEditor({
                         </ToolbarBtn>
                         <ToolbarBtn onClick={() => editor.chain().focus().setHorizontalRule().run()} disabled={disabled} title="Horizontal Rule">
                             <Minus size={14} />
+                        </ToolbarBtn>
+                        <ToolbarBtn onClick={() => editor.chain().focus().setPageBreak().run()} disabled={disabled} title="Page Break">
+                            <Scissors size={14} />
                         </ToolbarBtn>
                     </>
                 )}
