@@ -50,10 +50,14 @@ function PaperEditorInner({ paperId }: PaperEditorProps) {
 
     const templateConfig = paper.templateConfig as JournalTemplateConfig;
     const rawPaperData = (editData ?? paper.renderedData) as StructuredPaperData;
-    // Normalize body for legacy data
+    // Normalize arrays for legacy data
     const paperData: StructuredPaperData = {
         ...rawPaperData,
         body: Array.isArray(rawPaperData.body) ? rawPaperData.body : [],
+        references: Array.isArray(rawPaperData.references) ? rawPaperData.references : [],
+        tables: Array.isArray(rawPaperData.tables) ? rawPaperData.tables : [],
+        keywords: Array.isArray(rawPaperData.keywords) ? rawPaperData.keywords : [],
+        authors: Array.isArray(rawPaperData.authors) ? rawPaperData.authors : [],
     };
 
     const handleStartEdit = () => {
@@ -64,6 +68,11 @@ function PaperEditorInner({ paperId }: PaperEditorProps) {
                 ? [{ heading: "", content: raw.body }]
                 : [];
         }
+        // Normalize other arrays for legacy data
+        if (!Array.isArray(raw.references)) raw.references = [];
+        if (!Array.isArray(raw.tables)) raw.tables = [];
+        if (!Array.isArray(raw.keywords)) raw.keywords = [];
+        if (!Array.isArray(raw.authors)) raw.authors = [];
         setEditData(raw);
         setMode("edit");
     };
@@ -566,7 +575,7 @@ function PaperEditorInner({ paperId }: PaperEditorProps) {
 
                     {/* Live Preview */}
                     <div className="w-[45%] shrink-0 bg-white rounded-2xl border border-stone-100 overflow-hidden">
-                        <PaperPreview config={templateConfig} data={editData} />
+                        <PaperPreview config={templateConfig} data={paperData} />
                     </div>
                 </div>
             ) : (
