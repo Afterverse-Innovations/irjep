@@ -109,7 +109,10 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
 
 .paper-title {
   font-size: ${typography.titleFontSize}pt;
-  font-weight: bold;
+  font-weight: ${typography.titleBold ? "bold" : "normal"};
+  ${typography.titleItalic ? "font-style: italic;" : ""}
+  ${typography.titleUnderline ? "text-decoration: underline;" : ""}
+  color: ${typography.titleColor};
   text-align: center;
   margin-bottom: 4mm;
   line-height: 1.2;
@@ -182,26 +185,40 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
 }
 .paper-rich-content h1 {
   font-size: ${typography.sectionHeadingFontSize + 2}pt;
-  font-weight: bold;
+  font-weight: ${typography.sectionHeadingBold ? "bold" : "normal"};
+  ${typography.sectionHeadingItalic ? "font-style: italic;" : ""}
+  ${typography.sectionHeadingUnderline ? "text-decoration: underline;" : ""}
+  color: ${typography.sectionHeadingColor};
+  ${typography.sectionHeadingUppercase ? "text-transform: uppercase;" : ""}
   margin-top: ${spacing.betweenSections}mm;
   margin-bottom: ${spacing.afterHeading}mm;
 }
 .paper-rich-content h2 {
   font-size: ${typography.sectionHeadingFontSize}pt;
-  font-weight: bold;
+  font-weight: ${typography.sectionHeadingBold ? "bold" : "normal"};
+  ${typography.sectionHeadingItalic ? "font-style: italic;" : ""}
+  ${typography.sectionHeadingUnderline ? "text-decoration: underline;" : ""}
+  color: ${typography.sectionHeadingColor};
+  ${typography.sectionHeadingUppercase ? "text-transform: uppercase;" : ""}
   margin-top: ${spacing.betweenSections * 0.8}mm;
   margin-bottom: ${spacing.afterHeading}mm;
 }
 .paper-rich-content h3 {
   font-size: ${typography.sectionHeadingFontSize - 1}pt;
-  font-weight: bold;
+  font-weight: ${typography.sectionHeadingBold ? "bold" : "normal"};
+  ${typography.sectionHeadingItalic ? "font-style: italic;" : ""}
+  ${typography.sectionHeadingUnderline ? "text-decoration: underline;" : ""}
+  color: ${typography.sectionHeadingColor};
+  ${typography.sectionHeadingUppercase ? "text-transform: uppercase;" : ""}
   margin-top: ${spacing.betweenSections * 0.6}mm;
   margin-bottom: ${spacing.afterHeading * 0.75}mm;
 }
 .paper-rich-content h4 {
   font-size: ${typography.baseFontSize}pt;
-  font-weight: bold;
+  font-weight: ${typography.sectionHeadingBold ? "bold" : "normal"};
   font-style: italic;
+  ${typography.sectionHeadingUnderline ? "text-decoration: underline;" : ""}
+  color: ${typography.sectionHeadingColor};
   margin-top: ${spacing.betweenSections * 0.4}mm;
   margin-bottom: ${spacing.afterHeading * 0.5}mm;
 }

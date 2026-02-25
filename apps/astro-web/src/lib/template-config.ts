@@ -20,8 +20,18 @@ export interface TypographyConfig {
     baseFontSize: number;      // pt
     baseLineHeight: number;    // unitless multiplier
     titleFontSize: number;
+    titleColor: string;
+    titleBold: boolean;
+    titleItalic: boolean;
+    titleUnderline: boolean;
+    titleAlign: "left" | "center" | "right" | "justify";
     sectionHeadingFontSize: number;
     sectionHeadingUppercase: boolean;
+    sectionHeadingColor: string;
+    sectionHeadingBold: boolean;
+    sectionHeadingItalic: boolean;
+    sectionHeadingUnderline: boolean;
+    sectionHeadingAlign: "left" | "center" | "right" | "justify";
     tableFontSize: number;
     referenceFontSize: number;
     headerFooterFontSize: number;

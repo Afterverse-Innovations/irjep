@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@local-convex/_generated/api";
 import {
@@ -117,6 +117,7 @@ function TemplateBuilderInner({ templateId }: TemplateBuilderProps) {
     const [version, setVersion] = useState("1.0");
     const [config, setConfig] = useState<JournalTemplateConfig>(DEFAULT_TEMPLATE_CONFIG);
     const [isDirty, setIsDirty] = useState(false);
+    const [selectedPaperId, setSelectedPaperId] = useState<string>("sample");
 
     // Convex operations
     const existingTemplate = useQuery(
@@ -127,6 +128,28 @@ function TemplateBuilderInner({ templateId }: TemplateBuilderProps) {
     const updateTemplate = useMutation(api.templates.update);
     const cloneTemplate = useMutation(api.templates.clone);
     const removeTemplate = useMutation(api.templates.remove);
+
+    // Papers list for preview selector
+    const papersList = useQuery(api.papers.list);
+
+    // Resolve preview data: selected paper or sample
+    const previewData: StructuredPaperData = useMemo(() => {
+        if (selectedPaperId !== "sample" && papersList) {
+            const found = papersList.find((p: any) => p._id === selectedPaperId);
+            if (found?.renderedData) {
+                const rd = found.renderedData as any;
+                return {
+                    ...rd,
+                    body: Array.isArray(rd.body) ? rd.body : [],
+                    references: Array.isArray(rd.references) ? rd.references : [],
+                    tables: Array.isArray(rd.tables) ? rd.tables : [],
+                    keywords: Array.isArray(rd.keywords) ? rd.keywords : [],
+                    authors: Array.isArray(rd.authors) ? rd.authors : [],
+                };
+            }
+        }
+        return SAMPLE_PAPER_DATA;
+    }, [selectedPaperId, papersList]);
 
     // Load existing template data
     useEffect(() => {
@@ -324,8 +347,26 @@ function TemplateBuilderInner({ templateId }: TemplateBuilderProps) {
                 </div>
 
                 {/* Right: Live Preview */}
-                <div className="flex-1 bg-stone-100">
-                    <PaperPreview config={config} data={SAMPLE_PAPER_DATA} />
+                <div className="flex-1 bg-stone-100 flex flex-col overflow-hidden">
+                    {/* Paper selector */}
+                    <div className="flex items-center gap-2 px-4 py-2 bg-white border-b border-stone-200 shrink-0 min-w-0">
+                        <label className="text-xs font-medium text-stone-500 whitespace-nowrap">Preview with:</label>
+                        <select
+                            value={selectedPaperId}
+                            onChange={(e) => setSelectedPaperId(e.target.value)}
+                            className="min-w-0 flex-1 text-xs px-2 py-1.5 rounded-lg border border-stone-200 bg-stone-50 text-stone-700 focus:ring-1 focus:ring-emerald-300 outline-none overflow-hidden text-ellipsis"
+                        >
+                            <option value="sample">Sample Paper (built-in)</option>
+                            {papersList?.map((p: any) => (
+                                <option key={p._id} value={p._id}>
+                                    {p.submissionTitle || "Untitled"} — {(p.renderedData as any)?.title || "No title"}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="flex-1 overflow-auto">
+                        <PaperPreview config={config} data={previewData} />
+                    </div>
                 </div>
             </div>
         </div>

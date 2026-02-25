@@ -72,8 +72,8 @@ export function TypographySettings({ config, onChange }: Props) {
                                 key={a}
                                 onClick={() => onChange({ textAlign: a })}
                                 className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors ${config.textAlign === a
-                                        ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
-                                        : "bg-white text-stone-500 border border-stone-200 hover:bg-stone-50"
+                                    ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
+                                    : "bg-white text-stone-500 border border-stone-200 hover:bg-stone-50"
                                     }`}
                             >
                                 {a.charAt(0).toUpperCase() + a.slice(1)}
@@ -83,13 +83,111 @@ export function TypographySettings({ config, onChange }: Props) {
                 </div>
             </div>
 
-            {/* Per-Element Sizes */}
+            {/* Title Style */}
             <div className="space-y-3 p-3 bg-stone-50 rounded-lg">
-                <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Element Sizes</div>
+                <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Title Style</div>
+
+                <div>
+                    <label className="block text-xs font-medium text-stone-600 mb-1">
+                        Size: {config.titleFontSize}pt
+                    </label>
+                    <input
+                        type="range" min="12" max="28" step="0.5"
+                        value={config.titleFontSize}
+                        onChange={(e) => onChange({ titleFontSize: Number(e.target.value) })}
+                        className="w-full accent-emerald-600"
+                    />
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <label className="text-xs font-medium text-stone-600">Color</label>
+                    <input
+                        type="color"
+                        value={config.titleColor ?? "#000000"}
+                        onChange={(e) => onChange({ titleColor: e.target.value })}
+                        className="w-7 h-7 rounded border border-stone-200 cursor-pointer p-0.5"
+                    />
+                    <div className="inline-flex rounded-lg overflow-hidden border border-stone-200 ml-auto">
+                        {([
+                            ["titleBold", "B", "font-bold"] as const,
+                            ["titleItalic", "I", "italic"] as const,
+                            ["titleUnderline", "U", "underline"] as const,
+                        ]).map(([key, label, style], idx) => (
+                            <button
+                                key={key}
+                                onClick={() => onChange({ [key]: !config[key] } as any)}
+                                className={`w-8 h-8 text-xs font-medium transition-colors ${style === "font-bold" ? "font-bold" : ""} ${style === "italic" ? "italic" : ""} ${style === "underline" ? "underline" : ""} ${idx > 0 ? "border-l border-stone-200" : ""} ${config[key]
+                                        ? "bg-emerald-100 text-emerald-700"
+                                        : "bg-white text-stone-500 hover:bg-stone-50"
+                                    }`}
+                            >
+                                {label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* Section Heading Style */}
+            <div className="space-y-3 p-3 bg-stone-50 rounded-lg">
+                <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Section Heading Style</div>
+
+                <div>
+                    <label className="block text-xs font-medium text-stone-600 mb-1">
+                        Size: {config.sectionHeadingFontSize}pt
+                    </label>
+                    <input
+                        type="range" min="8" max="18" step="0.5"
+                        value={config.sectionHeadingFontSize}
+                        onChange={(e) => onChange({ sectionHeadingFontSize: Number(e.target.value) })}
+                        className="w-full accent-emerald-600"
+                    />
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <label className="text-xs font-medium text-stone-600">Color</label>
+                    <input
+                        type="color"
+                        value={config.sectionHeadingColor ?? "#000000"}
+                        onChange={(e) => onChange({ sectionHeadingColor: e.target.value })}
+                        className="w-7 h-7 rounded border border-stone-200 cursor-pointer p-0.5"
+                    />
+                    <div className="inline-flex rounded-lg overflow-hidden border border-stone-200 ml-auto">
+                        {([
+                            ["sectionHeadingBold", "B", "font-bold"] as const,
+                            ["sectionHeadingItalic", "I", "italic"] as const,
+                            ["sectionHeadingUnderline", "U", "underline"] as const,
+                        ]).map(([key, label, style], idx) => (
+                            <button
+                                key={key}
+                                onClick={() => onChange({ [key]: !config[key] } as any)}
+                                className={`w-8 h-8 text-xs font-medium transition-colors ${style === "font-bold" ? "font-bold" : ""} ${style === "italic" ? "italic" : ""} ${style === "underline" ? "underline" : ""} ${idx > 0 ? "border-l border-stone-200" : ""} ${config[key]
+                                        ? "bg-emerald-100 text-emerald-700"
+                                        : "bg-white text-stone-500 hover:bg-stone-50"
+                                    }`}
+                            >
+                                {label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        checked={config.sectionHeadingUppercase}
+                        onChange={(e) => onChange({ sectionHeadingUppercase: e.target.checked })}
+                        className="rounded border-stone-300 text-emerald-600 focus:ring-emerald-300"
+                    />
+                    <span className="text-xs text-stone-600">Uppercase</span>
+                </label>
+            </div>
+
+            {/* Other Element Sizes */}
+            <div className="space-y-3 p-3 bg-stone-50 rounded-lg">
+                <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Other Sizes</div>
 
                 {([
-                    ["titleFontSize", "Title", 12, 28],
-                    ["sectionHeadingFontSize", "Section Heading", 8, 18],
                     ["tableFontSize", "Table Text", 6, 14],
                     ["referenceFontSize", "Reference Text", 6, 14],
                     ["headerFooterFontSize", "Header/Footer", 6, 12],
@@ -106,16 +204,6 @@ export function TypographySettings({ config, onChange }: Props) {
                         />
                     </div>
                 ))}
-
-                <label className="flex items-center gap-2 cursor-pointer pt-1">
-                    <input
-                        type="checkbox"
-                        checked={config.sectionHeadingUppercase}
-                        onChange={(e) => onChange({ sectionHeadingUppercase: e.target.checked })}
-                        className="rounded border-stone-300 text-emerald-600 focus:ring-emerald-300"
-                    />
-                    <span className="text-xs text-stone-600">Section headings uppercase</span>
-                </label>
             </div>
         </div>
     );
