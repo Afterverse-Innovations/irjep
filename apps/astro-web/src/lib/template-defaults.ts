@@ -1,4 +1,22 @@
-import type { JournalTemplateConfig } from "./template-config";
+import type { JournalTemplateConfig, SectionStyle, BoxSpacing } from "./template-config";
+
+const Z: BoxSpacing = { top: 0, right: 0, bottom: 0, left: 0 };
+
+/** Global baseline style — every section inherits from this */
+const GLOBAL_STYLE: SectionStyle = {
+    fontFamily: "'Times New Roman', Times, serif",
+    fontSize: 10,
+    fontColor: "#000000",
+    bold: false,
+    italic: false,
+    underline: false,
+    uppercase: false,
+    textAlign: "justify",
+    backgroundColor: "transparent",
+    lineHeight: 1.4,
+    margin: Z,
+    padding: Z,
+};
 
 /**
  * Default template config — sensible academic journal defaults.
@@ -13,27 +31,56 @@ export const DEFAULT_TEMPLATE_CONFIG: JournalTemplateConfig = {
         printBackground: false,
     },
 
-    typography: {
-        baseFontFamily: "'Times New Roman', Times, serif",
-        baseFontSize: 10,
-        baseLineHeight: 1.4,
-        titleFontSize: 18,
-        titleColor: "#000000",
-        titleBold: true,
-        titleItalic: false,
-        titleUnderline: false,
-        titleAlign: "center",
-        sectionHeadingFontSize: 12,
-        sectionHeadingUppercase: true,
-        sectionHeadingColor: "#000000",
-        sectionHeadingBold: true,
-        sectionHeadingItalic: false,
-        sectionHeadingUnderline: false,
-        sectionHeadingAlign: "left",
-        tableFontSize: 9,
-        referenceFontSize: 9,
-        headerFooterFontSize: 8,
-        textAlign: "justify",
+    global: GLOBAL_STYLE,
+
+    sections: {
+        title: {
+            fontSize: 18,
+            bold: true,
+            textAlign: "center",
+            lineHeight: 1.2,
+            margin: { top: 0, right: 0, bottom: 4, left: 0 },
+        },
+        authors: {
+            textAlign: "center",
+            margin: { top: 0, right: 0, bottom: 2, left: 0 },
+        },
+        affiliations: {
+            italic: true,
+            fontSize: 9,
+            fontColor: "#444444",
+            textAlign: "center",
+            margin: { top: 0, right: 0, bottom: 4, left: 0 },
+        },
+        abstract: {
+            margin: { top: 0, right: 0, bottom: 8, left: 0 },
+        },
+        keywords: {
+            fontSize: 9,
+            italic: true,
+            margin: { top: 0, right: 0, bottom: 8, left: 0 },
+        },
+        sectionHeadings: {
+            fontSize: 12,
+            bold: true,
+            uppercase: true,
+            textAlign: "left",
+        },
+        bodyText: {},
+        references: {
+            fontSize: 9,
+        },
+        tables: {
+            fontSize: 9,
+        },
+        header: {
+            fontSize: 8,
+            fontColor: "#555555",
+        },
+        footer: {
+            fontSize: 8,
+            fontColor: "#555555",
+        },
     },
 
     layout: {
@@ -45,14 +92,8 @@ export const DEFAULT_TEMPLATE_CONFIG: JournalTemplateConfig = {
 
     header: {
         blocks: [
-            {
-                tokens: ["{{journalName}}"],
-                alignment: "left",
-            },
-            {
-                tokens: ["Vol. {{volume}}, Issue {{issue}}, {{year}}"],
-                alignment: "right",
-            },
+            { tokens: ["{{journalName}}"], alignment: "left" },
+            { tokens: ["Vol. {{volume}}, Issue {{issue}}, {{year}}"], alignment: "right" },
         ],
         borderBottom: true,
         borderColor: "#cccccc",
@@ -69,12 +110,9 @@ export const DEFAULT_TEMPLATE_CONFIG: JournalTemplateConfig = {
         borderColor: "#cccccc",
     },
 
-    abstract: {
+    abstractLabel: {
         labelText: "Abstract",
         labelBold: true,
-        indentLeft: 10,
-        indentRight: 10,
-        fontSizeOffset: 0,
     },
 
     table: {

@@ -116,7 +116,7 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
             {/* Abstract — own 2-column section */}
             {data.abstract && (
                 <div className="paper-abstract-columns">
-                    <div className="paper-abstract-label">{config.abstract.labelText}</div>
+                    <div className="paper-abstract-label">{config.abstractLabel.labelText}</div>
                     <div className="paper-rich-content" dangerouslySetInnerHTML={{ __html: data.abstract }} />
                 </div>
             )}
@@ -128,7 +128,7 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
                 </div>
             )}
         </div>
-    ), [data.title, data.authors, data.keywords, data.abstract, config.abstract.labelText]);
+    ), [data.title, data.authors, data.keywords, data.abstract, config.abstractLabel.labelText]);
 
     // ─── Body stream JSX (body + refs + metadata — no abstract) ─
     const bodyStreamJSX = useMemo(() => {

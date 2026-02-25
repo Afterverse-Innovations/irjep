@@ -2,24 +2,24 @@ import { useState, useCallback, useEffect, useMemo } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@local-convex/_generated/api";
 import {
-    Save, Copy, Trash2, ChevronLeft,
-    FileText, Type, Columns3, PanelTop,
+    Save, Copy, Trash2, ChevronLeft, ChevronDown, ChevronRight,
+    FileText, Paintbrush, Layers, Columns3, PanelTop,
     PanelBottom, Table, BookOpen, Hash, Space,
 } from "lucide-react";
 import { toast } from "sonner";
-import type { JournalTemplateConfig } from "@/lib/template-config";
+import type { JournalTemplateConfig, SectionKey, SectionStyle } from "@/lib/template-config";
+import { resolveStyle, SECTION_KEYS, SECTION_LABELS } from "@/lib/template-config";
 import type { StructuredPaperData } from "@/lib/paper-data";
 import { DEFAULT_TEMPLATE_CONFIG } from "@/lib/template-defaults";
 import { PaperPreview } from "@/components/paper-renderer/PaperPreview";
 import { PageSettings } from "./panels/PageSettings";
-import { TypographySettings } from "./panels/TypographySettings";
+import { SectionStyleEditor } from "./panels/SectionStyleEditor";
 import { LayoutSettings } from "./panels/LayoutSettings";
 import { HeaderSettings } from "./panels/HeaderSettings";
 import { FooterSettings } from "./panels/FooterSettings";
 import { TableSettings } from "./panels/TableSettings";
 import { ReferenceSettings } from "./panels/ReferenceSettings";
 import { NumberingSettings } from "./panels/NumberingSettings";
-import { SpacingSettings } from "./panels/SpacingSettings";
 import { withConvex } from "@/components/ConvexClientProvider";
 
 // Sample data for live preview while building templates
@@ -94,14 +94,15 @@ const SAMPLE_PAPER_DATA: StructuredPaperData = {
 
 const TABS = [
     { id: "page", label: "Page", icon: FileText },
-    { id: "typography", label: "Typography", icon: Type },
+    { id: "global", label: "Global Style", icon: Paintbrush },
+    { id: "sections", label: "Sections", icon: Layers },
+    { id: "spacing", label: "Spacing", icon: Space },
     { id: "layout", label: "Layout", icon: Columns3 },
     { id: "header", label: "Header", icon: PanelTop },
     { id: "footer", label: "Footer", icon: PanelBottom },
     { id: "table", label: "Tables", icon: Table },
     { id: "reference", label: "References", icon: BookOpen },
     { id: "numbering", label: "Numbering", icon: Hash },
-    { id: "spacing", label: "Spacing", icon: Space },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -118,6 +119,7 @@ function TemplateBuilderInner({ templateId }: TemplateBuilderProps) {
     const [config, setConfig] = useState<JournalTemplateConfig>(DEFAULT_TEMPLATE_CONFIG);
     const [isDirty, setIsDirty] = useState(false);
     const [selectedPaperId, setSelectedPaperId] = useState<string>("sample");
+    const [expandedSection, setExpandedSection] = useState<SectionKey | null>("title");
 
     // Convex operations
     const existingTemplate = useQuery(
@@ -157,7 +159,16 @@ function TemplateBuilderInner({ templateId }: TemplateBuilderProps) {
             setName(existingTemplate.name);
             setDescription(existingTemplate.description ?? "");
             setVersion(existingTemplate.version);
-            setConfig(existingTemplate.config as JournalTemplateConfig);
+
+            const loadedConfig = (existingTemplate.config as any) || {};
+            setConfig({
+                ...DEFAULT_TEMPLATE_CONFIG,
+                ...loadedConfig,
+                sections: loadedConfig.sections ?? DEFAULT_TEMPLATE_CONFIG.sections,
+                global: loadedConfig.global ?? DEFAULT_TEMPLATE_CONFIG.global,
+                // Map old 'abstract' key to new 'abstractLabel' if needed
+                abstractLabel: loadedConfig.abstractLabel ?? loadedConfig.abstract ?? DEFAULT_TEMPLATE_CONFIG.abstractLabel,
+            });
         }
     }, [existingTemplate]);
 
@@ -168,7 +179,19 @@ function TemplateBuilderInner({ templateId }: TemplateBuilderProps) {
     ) => {
         setConfig((prev) => ({
             ...prev,
-            [section]: { ...prev[section], ...value },
+            [section]: { ...(prev[section] || {}), ...value },
+        }));
+        setIsDirty(true);
+    }, []);
+
+    // Section override updater
+    const updateSectionStyle = useCallback((key: SectionKey, patch: Partial<SectionStyle>) => {
+        setConfig((prev) => ({
+            ...prev,
+            sections: {
+                ...(prev.sections || {}),
+                [key]: { ...(prev.sections?.[key] || {}), ...patch },
+            },
         }));
         setIsDirty(true);
     }, []);
@@ -335,14 +358,110 @@ function TemplateBuilderInner({ templateId }: TemplateBuilderProps) {
                     {/* Panel Content */}
                     <div className="flex-1 overflow-y-auto p-4">
                         {activeTab === "page" && <PageSettings config={config.page} onChange={(v) => updateConfig("page", v)} />}
-                        {activeTab === "typography" && <TypographySettings config={config.typography} onChange={(v) => updateConfig("typography", v)} />}
+
+                        {activeTab === "global" && (
+                            <div className="space-y-5">
+                                <h3 className="text-sm font-bold text-stone-900">Global Style</h3>
+                                <p className="text-xs text-stone-400">Base style inherited by all sections unless overridden.</p>
+                                <div className="p-3 bg-stone-50 rounded-lg">
+                                    <SectionStyleEditor
+                                        resolved={config.global}
+                                        override={config.global}
+                                        onChange={(patch) => updateConfig("global", patch)}
+                                        showFontFamily
+                                        showLineHeight
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === "sections" && (
+                            <div className="space-y-2">
+                                <h3 className="text-sm font-bold text-stone-900">Section Styles</h3>
+                                <p className="text-xs text-stone-400 mb-3">Override global style per section.</p>
+                                {SECTION_KEYS.map((key) => {
+                                    const isOpen = expandedSection === key;
+                                    const resolved = resolveStyle(config.global, config.sections[key]);
+                                    return (
+                                        <div key={key} className="border border-stone-200 rounded-lg overflow-hidden">
+                                            <button
+                                                onClick={() => setExpandedSection(isOpen ? null : key)}
+                                                className="w-full flex items-center justify-between px-3 py-2.5 bg-stone-50 hover:bg-stone-100 transition-colors text-left"
+                                            >
+                                                <span className="text-xs font-semibold text-stone-700">{SECTION_LABELS[key]}</span>
+                                                {isOpen ? <ChevronDown size={14} className="text-stone-400" /> : <ChevronRight size={14} className="text-stone-400" />}
+                                            </button>
+                                            {isOpen && (
+                                                <div className="p-3 border-t border-stone-100">
+                                                    <SectionStyleEditor
+                                                        resolved={resolved}
+                                                        override={config.sections[key]}
+                                                        onChange={(patch) => updateSectionStyle(key, patch)}
+                                                        showFontFamily
+                                                        showLineHeight={key === "bodyText" || key === "abstract"}
+                                                        fontSizeRange={key === "header" || key === "footer" ? [6, 12] : [6, 28]}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        {activeTab === "spacing" && (
+                            <div className="space-y-5">
+                                <h3 className="text-sm font-bold text-stone-900">Spacing</h3>
+                                <div className="space-y-3 p-3 bg-stone-50 rounded-lg">
+                                    <div>
+                                        <label className="block text-xs font-medium text-stone-600 mb-1">
+                                            Between Sections: {config.spacing.betweenSections}mm
+                                        </label>
+                                        <input type="range" min="2" max="30" step="0.5" value={config.spacing.betweenSections}
+                                            onChange={(e) => updateConfig("spacing", { betweenSections: Number(e.target.value) })}
+                                            className="w-full accent-emerald-600" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-stone-600 mb-1">
+                                            Between Paragraphs: {config.spacing.betweenParagraphs}mm
+                                        </label>
+                                        <input type="range" min="0" max="15" step="0.5" value={config.spacing.betweenParagraphs}
+                                            onChange={(e) => updateConfig("spacing", { betweenParagraphs: Number(e.target.value) })}
+                                            className="w-full accent-emerald-600" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-stone-600 mb-1">
+                                            After Heading: {config.spacing.afterHeading}mm
+                                        </label>
+                                        <input type="range" min="1" max="15" step="0.5" value={config.spacing.afterHeading}
+                                            onChange={(e) => updateConfig("spacing", { afterHeading: Number(e.target.value) })}
+                                            className="w-full accent-emerald-600" />
+                                    </div>
+                                </div>
+                                <div className="p-3 bg-stone-50 rounded-lg space-y-2">
+                                    <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Abstract Label</div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-stone-600 mb-1">Label Text</label>
+                                        <input type="text" value={config.abstractLabel.labelText}
+                                            onChange={(e) => updateConfig("abstractLabel", { labelText: e.target.value })}
+                                            className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm" />
+                                    </div>
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" checked={config.abstractLabel.labelBold}
+                                            onChange={(e) => updateConfig("abstractLabel", { labelBold: e.target.checked })}
+                                            className="rounded border-stone-300 text-emerald-600 focus:ring-emerald-300" />
+                                        <span className="text-xs text-stone-600">Bold label</span>
+                                    </label>
+                                </div>
+                            </div>
+                        )}
+
                         {activeTab === "layout" && <LayoutSettings config={config.layout} onChange={(v) => updateConfig("layout", v)} />}
                         {activeTab === "header" && <HeaderSettings config={config.header} onChange={(v) => updateConfig("header", v)} />}
                         {activeTab === "footer" && <FooterSettings config={config.footer} onChange={(v) => updateConfig("footer", v)} />}
                         {activeTab === "table" && <TableSettings config={config.table} onChange={(v) => updateConfig("table", v)} />}
                         {activeTab === "reference" && <ReferenceSettings config={config.reference} onChange={(v) => updateConfig("reference", v)} />}
                         {activeTab === "numbering" && <NumberingSettings config={config.numbering} onChange={(v) => updateConfig("numbering", v)} />}
-                        {activeTab === "spacing" && <SpacingSettings config={config.spacing} onChange={(v) => updateConfig("spacing", v)} />}
                     </div>
                 </div>
 

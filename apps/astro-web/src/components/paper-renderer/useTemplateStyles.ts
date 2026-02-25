@@ -1,9 +1,29 @@
 import { useMemo } from "react";
-import type { JournalTemplateConfig } from "@/lib/template-config";
+import type { JournalTemplateConfig, SectionStyle, BoxSpacing } from "@/lib/template-config";
+import { resolveStyle } from "@/lib/template-config";
 
 export function useTemplateStyles(config: JournalTemplateConfig): string {
   return useMemo(() => generateTemplateCSS(config), [config]);
 }
+
+// ─── helpers ────────────────────────────────────────────────────────
+
+const box = (b: BoxSpacing) => `${b.top}mm ${b.right}mm ${b.bottom}mm ${b.left}mm`;
+
+const fontStyle = (s: SectionStyle) => `
+  font-family: ${s.fontFamily};
+  font-size: ${s.fontSize}pt;
+  color: ${s.fontColor};
+  font-weight: ${s.bold ? "bold" : "normal"};
+  ${s.italic ? "font-style: italic;" : ""}
+  ${s.underline ? "text-decoration: underline;" : ""}
+  ${s.uppercase ? "text-transform: uppercase;" : ""}
+  text-align: ${s.textAlign};
+  line-height: ${s.lineHeight};
+  background-color: ${s.backgroundColor};
+  margin: ${box(s.margin)};
+  padding: ${box(s.padding)};
+`;
 
 const PAGE_SIZES: Record<string, { width: number; height: number }> = {
   A4: { width: 210, height: 297 },
@@ -12,8 +32,33 @@ const PAGE_SIZES: Record<string, { width: number; height: number }> = {
   B5: { width: 176, height: 250 },
 };
 
+// ─── main generator ─────────────────────────────────────────────────
+
 export function generateTemplateCSS(config: JournalTemplateConfig): string {
-  const { page, typography, layout, header, footer, abstract, table, reference, spacing } = config;
+  if (!config) return "";
+  const page = config.page || {} as any;
+  const layout = config.layout || {} as any;
+  const header = config.header || {} as any;
+  const footer = config.footer || {} as any;
+  const table = config.table || {} as any;
+  const reference = config.reference || {} as any;
+  const spacing = config.spacing || {} as any;
+  const g = config.global || {} as any;
+  const sec = config.sections || {} as any;
+  const abstractLabel = config.abstractLabel || {} as any;
+
+  // resolve each section
+  const title = resolveStyle(g, sec.title);
+  const authors = resolveStyle(g, sec.authors);
+  const affiliations = resolveStyle(g, sec.affiliations);
+  const abstract = resolveStyle(g, sec.abstract);
+  const keywords = resolveStyle(g, sec.keywords);
+  const headings = resolveStyle(g, sec.sectionHeadings);
+  const body = resolveStyle(g, sec.bodyText);
+  const refs = resolveStyle(g, sec.references);
+  const tables = resolveStyle(g, sec.tables);
+  const hdr = resolveStyle(g, sec.header);
+  const ftr = resolveStyle(g, sec.footer);
 
   const pageSize = PAGE_SIZES[page.size] ?? PAGE_SIZES.A4;
   const isLandscape = page.orientation === "landscape";
@@ -22,7 +67,7 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
 
   return `
 /* ═══════════════════════════════════════════════════════════
-   Template CSS — Column-fill: auto pagination
+   Template CSS — Section-based architecture
    ═══════════════════════════════════════════════════════════ */
 
 .paper-paged-wrapper {
@@ -37,11 +82,11 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
   height: ${pageHeight}mm;
   padding: ${page.margins.top}mm ${page.margins.right}mm ${page.margins.bottom}mm ${page.margins.left}mm;
   background: ${page.backgroundColor};
-  font-family: ${typography.baseFontFamily};
-  font-size: ${typography.baseFontSize}pt;
-  line-height: ${typography.baseLineHeight};
-  text-align: ${typography.textAlign};
-  color: #000;
+  font-family: ${g.fontFamily};
+  font-size: ${g.fontSize}pt;
+  line-height: ${g.lineHeight};
+  text-align: ${g.textAlign};
+  color: ${g.fontColor};
   box-sizing: border-box;
   position: relative;
   margin: 0 auto;
@@ -60,9 +105,7 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   BODY COLUMNS — the key to correct pagination.
-   column-fill: auto fills LEFT column first, then RIGHT.
-   With margin-top offset, each page restarts from the left.
+   BODY COLUMNS
    ═══════════════════════════════════════════════════════════ */
 .paper-body-columns {
   column-count: ${layout.columnCount};
@@ -77,10 +120,10 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: ${typography.headerFooterFontSize}pt;
+  font-size: ${hdr.fontSize}pt;
+  color: ${hdr.fontColor};
   padding-bottom: ${(header.paddingBottom + header.marginBottom) * 0.25}mm;
   ${header.borderBottom ? `border-bottom: 1px solid ${header.borderColor};` : ""}
-  color: #555;
   flex-shrink: 0;
 }
 
@@ -89,10 +132,10 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: ${typography.headerFooterFontSize}pt;
+  font-size: ${ftr.fontSize}pt;
+  color: ${ftr.fontColor};
   padding-top: 2mm;
   ${footer.borderTop ? `border-top: 1px solid ${footer.borderColor};` : ""}
-  color: #555;
   flex-shrink: 0;
   margin-top: auto;
 }
@@ -102,72 +145,49 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
   flex: 1;
 }
 
-/* ─── Title Block (page 1, outside columns) ────────────────── */
+/* ─── Title Block ──────────────────────────────────────────── */
 .paper-title-block {
   padding-bottom: 0mm;
 }
 
 .paper-title {
-  font-size: ${typography.titleFontSize}pt;
-  font-weight: ${typography.titleBold ? "bold" : "normal"};
-  ${typography.titleItalic ? "font-style: italic;" : ""}
-  ${typography.titleUnderline ? "text-decoration: underline;" : ""}
-  color: ${typography.titleColor};
-  text-align: center;
-  margin-bottom: 4mm;
-  line-height: 1.2;
+  ${fontStyle(title)}
 }
 
 .paper-authors {
-  text-align: center;
-  margin-bottom: 2mm;
-  font-size: ${typography.baseFontSize}pt;
+  ${fontStyle(authors)}
 }
 
 .paper-affiliations {
-  text-align: center;
-  font-size: ${typography.baseFontSize - 1}pt;
-  font-style: italic;
-  margin-bottom: 4mm;
-  color: #444;
+  ${fontStyle(affiliations)}
 }
 
-/* Abstract — own 2-column section between title and keywords */
+/* ─── Abstract ─────────────────────────────────────────────── */
 .paper-abstract-columns {
   column-count: ${layout.columnCount};
   column-gap: ${layout.columnGap}mm;
   column-fill: balance;
-  margin-bottom: ${spacing.betweenSections}mm;
-  padding-left: ${abstract.indentLeft}mm;
-  padding-right: ${abstract.indentRight}mm;
-  font-size: ${typography.baseFontSize + abstract.fontSizeOffset}pt;
+  font-size: ${abstract.fontSize}pt;
+  color: ${abstract.fontColor};
+  background-color: ${abstract.backgroundColor};
+  margin: ${box(abstract.margin)};
+  padding: ${box(abstract.padding)};
+  line-height: ${abstract.lineHeight};
 }
 
 .paper-abstract-label {
-  ${abstract.labelBold ? "font-weight: bold;" : ""}
-  margin-bottom: 2mm;
+  ${fontStyle(headings)}
   column-span: all;
 }
 
+/* ─── Keywords ─────────────────────────────────────────────── */
 .paper-keywords {
-  font-size: ${typography.baseFontSize - 1}pt;
-  margin-bottom: ${spacing.betweenSections}mm;
+  ${fontStyle(keywords)}
 }
 
 .paper-keywords-label {
   font-weight: bold;
   font-style: italic;
-}
-
-/* ─── Abstract ─────────────────────────────────────────────── */
-.paper-abstract-block {
-  margin-bottom: ${spacing.betweenSections}mm;
-  font-size: ${typography.baseFontSize + abstract.fontSizeOffset}pt;
-}
-
-.paper-abstract-label {
-  ${abstract.labelBold ? "font-weight: bold;" : ""}
-  margin-bottom: 2mm;
 }
 
 /* ─── Body Section ─────────────────────────────────────────── */
@@ -184,41 +204,45 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
   text-indent: 0;
 }
 .paper-rich-content h1 {
-  font-size: ${typography.sectionHeadingFontSize + 2}pt;
-  font-weight: ${typography.sectionHeadingBold ? "bold" : "normal"};
-  ${typography.sectionHeadingItalic ? "font-style: italic;" : ""}
-  ${typography.sectionHeadingUnderline ? "text-decoration: underline;" : ""}
-  color: ${typography.sectionHeadingColor};
-  ${typography.sectionHeadingUppercase ? "text-transform: uppercase;" : ""}
+  font-size: ${headings.fontSize + 2}pt;
+  font-weight: ${headings.bold ? "bold" : "normal"};
+  ${headings.italic ? "font-style: italic;" : ""}
+  ${headings.underline ? "text-decoration: underline;" : ""}
+  color: ${headings.fontColor};
+  ${headings.uppercase ? "text-transform: uppercase;" : ""}
+  text-align: ${headings.textAlign};
   margin-top: ${spacing.betweenSections}mm;
   margin-bottom: ${spacing.afterHeading}mm;
 }
 .paper-rich-content h2 {
-  font-size: ${typography.sectionHeadingFontSize}pt;
-  font-weight: ${typography.sectionHeadingBold ? "bold" : "normal"};
-  ${typography.sectionHeadingItalic ? "font-style: italic;" : ""}
-  ${typography.sectionHeadingUnderline ? "text-decoration: underline;" : ""}
-  color: ${typography.sectionHeadingColor};
-  ${typography.sectionHeadingUppercase ? "text-transform: uppercase;" : ""}
+  font-size: ${headings.fontSize}pt;
+  font-weight: ${headings.bold ? "bold" : "normal"};
+  ${headings.italic ? "font-style: italic;" : ""}
+  ${headings.underline ? "text-decoration: underline;" : ""}
+  color: ${headings.fontColor};
+  ${headings.uppercase ? "text-transform: uppercase;" : ""}
+  text-align: ${headings.textAlign};
   margin-top: ${spacing.betweenSections * 0.8}mm;
   margin-bottom: ${spacing.afterHeading}mm;
 }
 .paper-rich-content h3 {
-  font-size: ${typography.sectionHeadingFontSize - 1}pt;
-  font-weight: ${typography.sectionHeadingBold ? "bold" : "normal"};
-  ${typography.sectionHeadingItalic ? "font-style: italic;" : ""}
-  ${typography.sectionHeadingUnderline ? "text-decoration: underline;" : ""}
-  color: ${typography.sectionHeadingColor};
-  ${typography.sectionHeadingUppercase ? "text-transform: uppercase;" : ""}
+  font-size: ${headings.fontSize}pt;
+  font-weight: ${headings.bold ? "bold" : "normal"};
+  ${headings.italic ? "font-style: italic;" : ""}
+  ${headings.underline ? "text-decoration: underline;" : ""}
+  color: ${headings.fontColor};
+  ${headings.uppercase ? "text-transform: uppercase;" : ""}
+  text-align: ${headings.textAlign};
   margin-top: ${spacing.betweenSections * 0.6}mm;
   margin-bottom: ${spacing.afterHeading * 0.75}mm;
 }
 .paper-rich-content h4 {
-  font-size: ${typography.baseFontSize}pt;
-  font-weight: ${typography.sectionHeadingBold ? "bold" : "normal"};
+  font-size: ${body.fontSize}pt;
+  font-weight: ${headings.bold ? "bold" : "normal"};
   font-style: italic;
-  ${typography.sectionHeadingUnderline ? "text-decoration: underline;" : ""}
-  color: ${typography.sectionHeadingColor};
+  ${headings.underline ? "text-decoration: underline;" : ""}
+  color: ${headings.fontColor};
+  text-align: ${headings.textAlign};
   margin-top: ${spacing.betweenSections * 0.4}mm;
   margin-bottom: ${spacing.afterHeading * 0.5}mm;
 }
@@ -251,7 +275,7 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
 .paper-rich-content blockquote p { margin-bottom: 1mm; }
 .paper-rich-content code {
   font-family: "Courier New", Courier, monospace;
-  font-size: ${typography.baseFontSize - 1}pt;
+  font-size: ${body.fontSize - 1}pt;
   background: #f5f5f5;
   padding: 0.5mm 1mm;
   border-radius: 1mm;
@@ -262,7 +286,7 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
   border-radius: 1.5mm;
   margin-bottom: ${spacing.betweenParagraphs}mm;
   overflow-x: auto;
-  font-size: ${typography.baseFontSize - 1}pt;
+  font-size: ${body.fontSize - 1}pt;
 }
 .paper-rich-content pre code { background: none; padding: 0; border-radius: 0; }
 .paper-rich-content hr {
@@ -274,7 +298,7 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
 .paper-rich-content .tiptap-table {
   border-collapse: collapse;
   margin-bottom: ${spacing.betweenParagraphs}mm;
-  font-size: ${typography.tableFontSize}pt;
+  font-size: ${tables.fontSize}pt;
   line-height: 1.1;
 }
 .paper-rich-content table th,
@@ -301,7 +325,7 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
 .paper-rich-content p.table-caption,
 .paper-rich-content .table-caption {
   text-align: center;
-  font-size: ${typography.tableFontSize}pt;
+  font-size: ${tables.fontSize}pt;
   ${table.captionItalic ? "font-style: italic;" : ""}
   margin: 2mm 0 1mm;
 }
@@ -316,7 +340,7 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
 .paper-table-block {
   margin-bottom: ${spacing.betweenSections}mm;
   ${table.preventBreak ? "break-inside: avoid;" : ""}
-  font-size: ${typography.tableFontSize}pt;
+  font-size: ${tables.fontSize}pt;
 }
 .paper-table-caption {
   text-align: center;
@@ -336,11 +360,11 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
 }
 
 /* ─── References ───────────────────────────────────────────── */
-.paper-references { font-size: ${typography.referenceFontSize}pt; }
+.paper-references { font-size: ${refs.fontSize}pt; }
 .paper-references-heading {
-  font-size: ${typography.sectionHeadingFontSize}pt;
+  font-size: ${headings.fontSize}pt;
   font-weight: bold;
-  ${typography.sectionHeadingUppercase ? "text-transform: uppercase;" : ""}
+  ${headings.uppercase ? "text-transform: uppercase;" : ""}
   margin-bottom: ${spacing.afterHeading}mm;
 }
 .paper-reference-item {
@@ -354,12 +378,12 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
   margin-top: ${spacing.betweenSections}mm;
   padding-top: ${spacing.betweenSections}mm;
   border-top: 1px solid #ccc;
-  font-size: ${typography.baseFontSize - 1}pt;
+  font-size: ${body.fontSize - 1}pt;
 }
 .paper-endmatter-section { margin-bottom: ${spacing.betweenSections * 0.6}mm; }
 .paper-endmatter-heading {
   font-weight: bold;
-  font-size: ${typography.baseFontSize - 1}pt;
+  font-size: ${body.fontSize - 1}pt;
   text-transform: uppercase;
   margin-bottom: 1.5mm;
 }
@@ -369,7 +393,7 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5mm;
-  font-size: ${typography.baseFontSize - 1}pt;
+  font-size: ${body.fontSize - 1}pt;
 }
 `;
 }
