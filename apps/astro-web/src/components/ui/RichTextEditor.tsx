@@ -76,6 +76,7 @@ export function RichTextEditor({
             TableHeader,
             PageBreak,
             Image.configure({
+                allowBase64: true,
                 // @ts-ignore - resize is available in v3.0+
                 resize: true,
                 HTMLAttributes: {

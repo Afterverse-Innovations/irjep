@@ -48,9 +48,21 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
     const [bodyCapacityN, setBodyCapacityN] = useState(0); // page 2+
     const [bodySingleColH, setBodySingleColH] = useState(0);
     const [endMatterH, setEndMatterH] = useState(0);
+    const [measureTick, setMeasureTick] = useState(0);
+    const tickRef = useRef(0);
 
     const measureEndMatterRef = useRef<HTMLDivElement>(null);
     const colCount = config.layout.columnCount;
+
+    // Force recalculation on mount AND whenever config/data changes
+    // (fonts, images, CSS may load async after the initial render)
+    useEffect(() => {
+        const base = tickRef.current;
+        tickRef.current += 10;
+        const t1 = setTimeout(() => setMeasureTick(base + 1), 300);
+        const t2 = setTimeout(() => setMeasureTick(base + 2), 600);
+        return () => { clearTimeout(t1); clearTimeout(t2); };
+    }, [config, data]);
 
     // Token resolver
     const resolveTokens = useCallback(
@@ -319,7 +331,7 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
             setEndMatterH(emH);
             setPageCount(pages);
         }, 150);
-    }, [data, config, pageDims, colCount, bodyStreamJSX, titleBlockJSX, endMatterJSX]);
+    }, [data, config, pageDims, colCount, bodyStreamJSX, titleBlockJSX, endMatterJSX, measureTick]);
 
     // ─── Compute margin-top offset for body on each page ─────
     const getBodyOffset = (pageIdx: number): number => {
