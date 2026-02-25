@@ -110,7 +110,7 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
 .paper-body-columns {
   column-count: ${layout.columnCount};
   column-gap: ${layout.columnGap}mm;
-  column-fill: auto;
+  column-fill: balance;
   overflow: hidden;
   margin-top: 3mm;
 }

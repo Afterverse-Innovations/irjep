@@ -47,7 +47,9 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
     const [bodyCapacity1, setBodyCapacity1] = useState(0); // page 1
     const [bodyCapacityN, setBodyCapacityN] = useState(0); // page 2+
     const [bodySingleColH, setBodySingleColH] = useState(0);
+    const [endMatterH, setEndMatterH] = useState(0);
 
+    const measureEndMatterRef = useRef<HTMLDivElement>(null);
     const colCount = config.layout.columnCount;
 
     // Token resolver
@@ -194,66 +196,66 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
             );
         }
 
-        // End matter
-        if (endMatter) {
-            parts.push(
-                <div key="endmatter" className="paper-endmatter">
-                    {endMatter.contributorParticulars.length > 0 && (
-                        <div className="paper-endmatter-section">
-                            <div className="paper-endmatter-heading">Particulars of Contributors:</div>
-                            {endMatter.contributorParticulars.map(c => (
-                                <div key={c.number} className="paper-endmatter-item">{c.number}. {c.designation}</div>
-                            ))}
-                        </div>
-                    )}
-                    {endMatter.correspondingAuthor.name && (
-                        <div className="paper-endmatter-section">
-                            <div className="paper-endmatter-heading">Name, Address, E-mail ID of the Corresponding Author:</div>
-                            <div className="paper-endmatter-item">{endMatter.correspondingAuthor.name}</div>
-                            {endMatter.correspondingAuthor.address && <div className="paper-endmatter-item">{endMatter.correspondingAuthor.address}</div>}
-                            {endMatter.correspondingAuthor.email && <div className="paper-endmatter-item">Email: {endMatter.correspondingAuthor.email}</div>}
-                        </div>
-                    )}
-                    <div className="paper-endmatter-section">
-                        <div className="paper-endmatter-heading">Author Declaration:</div>
-                        <div className="paper-endmatter-item">• Financial or Other Competing Interests: {endMatter.authorDeclaration.competingInterests || "None"}</div>
-                        {endMatter.authorDeclaration.ethicsApproval && <div className="paper-endmatter-item">• Was Ethics Committee Approval obtained? {endMatter.authorDeclaration.ethicsApproval}</div>}
-                        {endMatter.authorDeclaration.informedConsent && <div className="paper-endmatter-item">• Was informed consent obtained? {endMatter.authorDeclaration.informedConsent}</div>}
-                    </div>
-                    {endMatter.plagiarismChecking.checkerEntries.length > 0 && (
-                        <div className="paper-endmatter-section">
-                            <div className="paper-endmatter-heading">Plagiarism Checking Methods:</div>
-                            {endMatter.plagiarismChecking.checkerEntries.map((entry, i) => (
-                                <div key={i} className="paper-endmatter-item">• {entry.method}: {entry.date}</div>
-                            ))}
-                        </div>
-                    )}
-                    {endMatter.pharmacology && (
-                        <div className="paper-endmatter-section">
-                            <div className="paper-endmatter-heading">Pharmacology:</div>
-                            <div className="paper-endmatter-item">{endMatter.pharmacology}</div>
-                        </div>
-                    )}
-                    {endMatter.emendations && (
-                        <div className="paper-endmatter-section">
-                            <div className="paper-endmatter-heading">Emendations: {endMatter.emendations}</div>
-                        </div>
-                    )}
-                    <div className="paper-endmatter-dates">
-                        {endMatter.dateOfSubmission && <div>Date of Submission: {endMatter.dateOfSubmission}</div>}
-                        {endMatter.dateOfPeerReview && <div>Date of Peer Review: {endMatter.dateOfPeerReview}</div>}
-                        {endMatter.dateOfAcceptance && <div>Date of Acceptance: {endMatter.dateOfAcceptance}</div>}
-                        {endMatter.dateOfPublishing && <div>Date of Publishing: {endMatter.dateOfPublishing}</div>}
-                    </div>
-                </div>
-            );
-        }
-
         if (parts.length === 0) {
             parts.push(<div key="empty" style={{ color: "#999", fontStyle: "italic", padding: "4mm 0" }}>[No content yet.]</div>);
         }
         return parts;
-    }, [data, config, numberedTables, numberedRefs, endMatter]);
+    }, [data.body, numberedTables, numberedRefs, config.numbering, config.reference]);
+
+    const endMatterJSX = useMemo(() => {
+        if (!endMatter) return null;
+        return (
+            <div key="endmatter" className="paper-endmatter">
+                {endMatter.contributorParticulars.length > 0 && (
+                    <div className="paper-endmatter-section">
+                        <div className="paper-endmatter-heading">Particulars of Contributors:</div>
+                        {endMatter.contributorParticulars.map(c => (
+                            <div key={c.number} className="paper-endmatter-item">{c.number}. {c.designation}</div>
+                        ))}
+                    </div>
+                )}
+                {endMatter.correspondingAuthor.name && (
+                    <div className="paper-endmatter-section">
+                        <div className="paper-endmatter-heading">Name, Address, E-mail ID of the Corresponding Author:</div>
+                        <div className="paper-endmatter-item">{endMatter.correspondingAuthor.name}</div>
+                        {endMatter.correspondingAuthor.address && <div className="paper-endmatter-item">{endMatter.correspondingAuthor.address}</div>}
+                        {endMatter.correspondingAuthor.email && <div className="paper-endmatter-item">Email: {endMatter.correspondingAuthor.email}</div>}
+                    </div>
+                )}
+                <div className="paper-endmatter-section">
+                    <div className="paper-endmatter-heading">Author Declaration:</div>
+                    <div className="paper-endmatter-item">• Financial or Other Competing Interests: {endMatter.authorDeclaration.competingInterests || "None"}</div>
+                    {endMatter.authorDeclaration.ethicsApproval && <div className="paper-endmatter-item">• Was Ethics Committee Approval obtained? {endMatter.authorDeclaration.ethicsApproval}</div>}
+                    {endMatter.authorDeclaration.informedConsent && <div className="paper-endmatter-item">• Was informed consent obtained? {endMatter.authorDeclaration.informedConsent}</div>}
+                </div>
+                {endMatter.plagiarismChecking.checkerEntries.length > 0 && (
+                    <div className="paper-endmatter-section">
+                        <div className="paper-endmatter-heading">Plagiarism Checking Methods:</div>
+                        {endMatter.plagiarismChecking.checkerEntries.map((entry, i) => (
+                            <div key={i} className="paper-endmatter-item">• {entry.method}: {entry.date}</div>
+                        ))}
+                    </div>
+                )}
+                {endMatter.pharmacology && (
+                    <div className="paper-endmatter-section">
+                        <div className="paper-endmatter-heading">Pharmacology:</div>
+                        <div className="paper-endmatter-item">{endMatter.pharmacology}</div>
+                    </div>
+                )}
+                {endMatter.emendations && (
+                    <div className="paper-endmatter-section">
+                        <div className="paper-endmatter-heading">Emendations: {endMatter.emendations}</div>
+                    </div>
+                )}
+                <div className="paper-endmatter-dates">
+                    {endMatter.dateOfSubmission && <div>Date of Submission: {endMatter.dateOfSubmission}</div>}
+                    {endMatter.dateOfPeerReview && <div>Date of Peer Review: {endMatter.dateOfPeerReview}</div>}
+                    {endMatter.dateOfAcceptance && <div>Date of Acceptance: {endMatter.dateOfAcceptance}</div>}
+                    {endMatter.dateOfPublishing && <div>Date of Publishing: {endMatter.dateOfPublishing}</div>}
+                </div>
+            </div>
+        );
+    }, [endMatter, config.sections.bodyText, config.global]);
 
     // ─── Measure & paginate ──────────────────────────────────
     useEffect(() => {
@@ -269,32 +271,55 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
             const titleBlockH = titleEl.offsetHeight;
             // Body measured at column width → single-col height at column width
             const bodyH = bodyEl.scrollHeight;
+            const emH = measureEndMatterRef.current?.offsetHeight ?? 0;
 
             const totalInner = pageDims.heightPx - pageDims.marginTopPx - pageDims.marginBottomPx;
-            // 3mm gap between header/title and body columns (matches CSS margin-top)
             const bodyGapPx = 3 * 3.7795;
-            // Page 1: header + title + gap + body columns + footer
+
             const cap1 = Math.max(0, totalInner - headerH - titleBlockH - bodyGapPx - footerH);
-            // Page 2+: header + gap + body columns + footer
             const capN = Math.max(0, totalInner - headerH - bodyGapPx - footerH);
 
-            // Each page shows colCount × capacity of single-col content
-            const contentOnPage1 = colCount * cap1;
-            let remaining = bodyH - contentOnPage1;
+            // Sequential pagination to account for spanning end-matter
             let pages = 1;
-            if (remaining > 0 && capN > 0) {
-                const contentPerPageN = colCount * capN;
-                pages = 1 + Math.ceil(remaining / contentPerPageN);
+            let currentRemaining = bodyH;
+
+            // Page 1
+            const p1Capacity = colCount * cap1;
+            if (currentRemaining <= p1Capacity) {
+                // Fits on page 1, but does endMatter fit?
+                const usedH = titleBlockH + bodyGapPx + (currentRemaining / colCount) + emH;
+                if (usedH > totalInner - headerH - footerH) {
+                    pages = 2; // EndMatter spills to page 2
+                } else {
+                    pages = 1;
+                }
+            } else {
+                currentRemaining -= p1Capacity;
+                pages = 1;
+                while (currentRemaining > 0) {
+                    pages++;
+                    const pNCapacity = colCount * capN;
+                    if (currentRemaining <= pNCapacity) {
+                        // Body fits on this page, but check endMatter
+                        const usedH = (currentRemaining / colCount) + emH;
+                        if (usedH > capN) {
+                            // endMatter spills to next page
+                            pages++;
+                        }
+                        break;
+                    }
+                    currentRemaining -= pNCapacity;
+                }
             }
 
             setTitleH(titleBlockH);
             setBodyCapacity1(cap1);
             setBodyCapacityN(capN);
             setBodySingleColH(bodyH);
+            setEndMatterH(emH);
             setPageCount(pages);
         }, 150);
-        return () => clearTimeout(timer);
-    }, [data, config, pageDims, colCount, bodyStreamJSX, titleBlockJSX]);
+    }, [data, config, pageDims, colCount, bodyStreamJSX, titleBlockJSX, endMatterJSX]);
 
     // ─── Compute margin-top offset for body on each page ─────
     const getBodyOffset = (pageIdx: number): number => {
@@ -351,6 +376,10 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
                 <div ref={measureBodyRef} style={{ width: pageDims.colWidthPx }}>
                     {bodyStreamJSX}
                 </div>
+                {/* Measure spanning end-matter at full page width */}
+                <div ref={measureEndMatterRef} style={{ width: pageDims.colWidthPx * colCount + (colCount - 1) * config.layout.columnGap * MM_TO_PX }}>
+                    {endMatterJSX}
+                </div>
                 <div ref={measureFooterRef}>{renderFooter(1, 1)}</div>
             </div>
 
@@ -368,11 +397,23 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
                             {pageIdx === 0 && titleBlockJSX}
 
                             {/* Body — columned container with margin-top offset */}
-                            <div className="paper-body-columns" style={{ height: containerH }}>
+                            <div className="paper-body-columns" style={{
+                                height: Math.min(
+                                    pageIdx === 0 ? bodyCapacity1 : bodyCapacityN,
+                                    Math.max(0, (bodySingleColH - offset) / colCount)
+                                )
+                            }}>
                                 <div style={{ marginTop: -offset }}>
                                     {bodyStreamJSX}
                                 </div>
                             </div>
+
+                            {/* Spanning End Matter - outside columns */}
+                            {pageIdx === pageCount - 1 && (
+                                <div className="paper-end-wrapper" ref={pageIdx === 0 ? measureEndMatterRef : undefined}>
+                                    {endMatterJSX}
+                                </div>
+                            )}
 
                             {renderFooter(pageIdx + 1, pageCount)}
                         </div>

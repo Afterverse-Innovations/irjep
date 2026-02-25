@@ -428,7 +428,7 @@ function TemplateBuilderInner({ templateId }: TemplateBuilderProps) {
                                         <label className="block text-xs font-medium text-stone-600 mb-1">
                                             Between Sections: {config.spacing.betweenSections}mm
                                         </label>
-                                        <input type="range" min="2" max="30" step="0.5" value={config.spacing.betweenSections}
+                                        <input type="range" min="0" max="30" step="0.5" value={config.spacing.betweenSections}
                                             onChange={(e) => updateConfig("spacing", { betweenSections: Number(e.target.value) })}
                                             className="w-full accent-emerald-600" />
                                     </div>
