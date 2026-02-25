@@ -161,14 +161,25 @@ function TemplateBuilderInner({ templateId }: TemplateBuilderProps) {
             setVersion(existingTemplate.version);
 
             const loadedConfig = (existingTemplate.config as any) || {};
-            setConfig({
+            const configWithMigration = {
                 ...DEFAULT_TEMPLATE_CONFIG,
                 ...loadedConfig,
                 sections: loadedConfig.sections ?? DEFAULT_TEMPLATE_CONFIG.sections,
                 global: loadedConfig.global ?? DEFAULT_TEMPLATE_CONFIG.global,
-                // Map old 'abstract' key to new 'abstractLabel' if needed
                 abstractLabel: loadedConfig.abstractLabel ?? loadedConfig.abstract ?? DEFAULT_TEMPLATE_CONFIG.abstractLabel,
-            });
+            };
+
+            // Migrate old header blocks to new fields
+            if (loadedConfig.header?.blocks && !loadedConfig.header.leftContent) {
+                const blocks = loadedConfig.header.blocks as any[];
+                configWithMigration.header = {
+                    ...configWithMigration.header,
+                    leftContent: blocks.find(b => b.alignment === "left")?.tokens?.join("") || "",
+                    rightContent: blocks.find(b => b.alignment === "right")?.tokens?.join("") || "",
+                };
+            }
+
+            setConfig(configWithMigration);
         }
     }, [existingTemplate]);
 

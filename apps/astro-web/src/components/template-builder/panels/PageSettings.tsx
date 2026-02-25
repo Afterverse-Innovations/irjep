@@ -35,8 +35,8 @@ export function PageSettings({ config, onChange }: Props) {
                             key={o}
                             onClick={() => onChange({ orientation: o })}
                             className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${config.orientation === o
-                                    ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
-                                    : "bg-stone-50 text-stone-500 hover:bg-stone-100"
+                                ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
+                                : "bg-stone-50 text-stone-500 hover:bg-stone-100"
                                 }`}
                         >
                             {o.charAt(0).toUpperCase() + o.slice(1)}
@@ -54,7 +54,7 @@ export function PageSettings({ config, onChange }: Props) {
                             <label className="block text-[10px] text-stone-400 uppercase mb-1">{side}</label>
                             <input
                                 type="range"
-                                min="5"
+                                min="0"
                                 max="50"
                                 value={config.margins[side]}
                                 onChange={(e) =>

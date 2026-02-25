@@ -117,27 +117,26 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
 
 /* ─── Header ───────────────────────────────────────────────── */
 .paper-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: ${hdr.fontSize}pt;
-  color: ${hdr.fontColor};
-  padding-bottom: ${(header.paddingBottom + header.marginBottom) * 0.25}mm;
-  ${header.borderBottom ? `border-bottom: 1px solid ${header.borderColor};` : ""}
+  ${fontStyle(hdr)}
+  /* Override structural parts from HeaderConfig specifically */
+  padding-bottom: ${header.paddingBottom}mm;
+  margin-bottom: ${header.marginBottom}mm;
+  ${header.borderBottom ? `border-bottom: 1px solid ${header.borderColor};` : "border-bottom: none;"}
   flex-shrink: 0;
+  display: block; /* The inner flex handles left/right */
 }
 
 /* ─── Footer ───────────────────────────────────────────────── */
 .paper-footer {
+  ${fontStyle(ftr)}
+  /* Structural overrides */
+  padding-top: 2mm;
+  ${footer.borderTop ? `border-top: 1px solid ${footer.borderColor};` : "border-top: none;"}
+  flex-shrink: 0;
+  margin-top: auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: ${ftr.fontSize}pt;
-  color: ${ftr.fontColor};
-  padding-top: 2mm;
-  ${footer.borderTop ? `border-top: 1px solid ${footer.borderColor};` : ""}
-  flex-shrink: 0;
-  margin-top: auto;
 }
 
 .paper-footer-page-number {
@@ -150,12 +149,30 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
   padding-bottom: 0mm;
 }
 
+.paper-meta-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 7.5pt;
+  color: #666;
+  margin-bottom: 2mm;
+  text-transform: uppercase;
+  letter-spacing: 0.5pt;
+}
+
 .paper-title {
   ${fontStyle(title)}
 }
 
 .paper-authors {
   ${fontStyle(authors)}
+}
+
+.paper-title-separator {
+  ${layout.showTitleSeparator ? `
+    height: ${layout.titleSeparatorThickness}mm;
+    background-color: ${layout.titleSeparatorColor};
+    margin: 0mm -15mm 0mm -15mm
+  ` : "display: none;"}
 }
 
 .paper-affiliations {
@@ -314,6 +331,10 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
   color: ${table.headerTextColor};
   font-weight: bold;
 }
+.paper-rich-content table tr:last-child td {
+  background-color: ${table.lastRowBackgroundColor};
+  color: ${table.lastRowFontColor};
+}
 .paper-rich-content table td p,
 .paper-rich-content table th p {
   margin-bottom: 1mm;
@@ -335,6 +356,16 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
 .paper-rich-content [style*="text-align: center"] { text-align: center; }
 .paper-rich-content [style*="text-align: right"] { text-align: right; }
 .paper-rich-content [style*="text-align: justify"] { text-align: justify; }
+.paper-rich-content img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 4mm 0;
+  border-radius: 1mm;
+}
+.paper-rich-content img[style*="text-align: left"] { margin-right: auto; margin-left: 0; }
+.paper-rich-content img[style*="text-align: center"] { margin-left: auto; margin-right: auto; }
+.paper-rich-content img[style*="text-align: right"] { margin-left: auto; margin-right: 0; }
 
 /* ─── Tables (structured) ──────────────────────────────────── */
 .paper-table-block {
@@ -358,19 +389,24 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
   color: ${table.headerTextColor};
   font-weight: bold;
 }
+.paper-table tr:last-child td {
+  background-color: ${table.lastRowBackgroundColor};
+  color: ${table.lastRowFontColor};
+}
 
 /* ─── References ───────────────────────────────────────────── */
 .paper-references { font-size: ${refs.fontSize}pt; }
 .paper-references-heading {
-  font-size: ${headings.fontSize}pt;
-  font-weight: bold;
-  ${headings.uppercase ? "text-transform: uppercase;" : ""}
+  ${fontStyle(headings)}
   margin-bottom: ${spacing.afterHeading}mm;
 }
 .paper-reference-item {
   padding-left: ${reference.hangingIndent}mm;
   text-indent: -${reference.hangingIndent}mm;
   margin-bottom: 1.5mm;
+}
+.paper-reference-number {
+  color: ${reference.numberingColor};
 }
 
 /* ─── End-Matter ───────────────────────────────────────────── */

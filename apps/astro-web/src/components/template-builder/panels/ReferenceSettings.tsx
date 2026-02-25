@@ -51,6 +51,21 @@ export function ReferenceSettings({ config, onChange }: Props) {
                 />
                 <span className="text-sm text-stone-600">Auto-number references</span>
             </label>
+
+            <div className="pt-2 border-t border-stone-100">
+                <div className="flex items-center justify-between">
+                    <label className="text-xs font-medium text-stone-600">Numbering Color</label>
+                    <div className="flex items-center gap-2">
+                        <input
+                            type="color"
+                            value={config.numberingColor}
+                            onChange={(e) => onChange({ numberingColor: e.target.value })}
+                            className="w-8 h-8 rounded border cursor-pointer p-0.5"
+                        />
+                        <span className="text-[10px] font-mono text-stone-400 uppercase">{config.numberingColor}</span>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }

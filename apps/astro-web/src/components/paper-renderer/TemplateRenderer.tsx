@@ -57,6 +57,8 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
                 .replace(/\{\{journalName\}\}/g, config.tokens.journalName)
                 .replace(/\{\{year\}\}/g, new Date().getFullYear().toString())
                 .replace(/\{\{doi\}\}/g, data.meta.doi ?? "")
+                .replace(/\{\{articleTitle\}\}/g, data.title || "")
+                .replace(/\{\{firstAuthor\}\}/g, data.authors?.[0]?.name || "")
                 .replace(/\{\{volume\}\}/g, data.meta.volume ?? "")
                 .replace(/\{\{issue\}\}/g, data.meta.issue ?? "")
                 .replace(/\{\{issn\}\}/g, config.tokens.issn ?? "")
@@ -99,6 +101,12 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
     // ─── Title block JSX (page 1 only, outside columns) ──────
     const titleBlockJSX = useMemo(() => (
         <div className="paper-title-block">
+            {config.layout.showMetaHeader && (
+                <div className="paper-meta-header">
+                    <span>{data.meta.doi ? `DOI: ${data.meta.doi}` : ""}</span>
+                    <span>{data.meta.articleType || "Article"}</span>
+                </div>
+            )}
             <div className="paper-title">{data.title || "Untitled Paper"}</div>
             <div className="paper-authors">
                 {data.authors.map((a, i) => (
@@ -108,6 +116,7 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
                     </span>
                 ))}
             </div>
+            {config.layout.showTitleSeparator && <div className="paper-title-separator" />}
             {data.authors.some(a => a.affiliation) && (
                 <div className="paper-affiliations">
                     {[...new Set(data.authors.map(a => a.affiliation).filter(Boolean))].join("; ")}
@@ -177,7 +186,9 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
                 <div key="references" className="paper-references">
                     <div className="paper-references-heading">References</div>
                     {numberedRefs.map(ref => (
-                        <div key={ref.number} className="paper-reference-item">[{ref.number}] {ref.text}</div>
+                        <div key={ref.number} className="paper-reference-item">
+                            <span className="paper-reference-number">[{ref.number}]</span> {ref.text}
+                        </div>
                     ))}
                 </div>
             );
@@ -301,11 +312,14 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
     // ─── Header ──────────────────────────────────────────────
     const renderHeader = (pageNum: number) => (
         <div className="paper-header">
-            {config.header.blocks.map((block, i) => (
-                <div key={i} style={{ textAlign: block.alignment }}>
-                    {resolveTokens(block.tokens.join(""), pageNum)}
+            <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                <div style={{ textAlign: "left" }}>
+                    {resolveTokens(config.header.leftContent || "", pageNum)}
                 </div>
-            ))}
+                <div style={{ textAlign: "right" }}>
+                    {resolveTokens(config.header.rightContent || "", pageNum)}
+                </div>
+            </div>
         </div>
     );
 

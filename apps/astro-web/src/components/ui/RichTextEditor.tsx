@@ -7,6 +7,7 @@ import Highlight from '@tiptap/extension-highlight';
 import TextAlign from '@tiptap/extension-text-align';
 import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
+import Image from '@tiptap/extension-image';
 import { Table } from '@tiptap/extension-table';
 import TableRow from '@tiptap/extension-table-row';
 import TableCell from '@tiptap/extension-table-cell';
@@ -20,7 +21,8 @@ import {
     Strikethrough, Plus, Trash2, Scissors,
     Columns2, Rows2, ArrowRight, ArrowLeft, ArrowUp, ArrowDown,
     Merge, Split, ToggleLeft, Grid2x2, Wrench,
-    ChevronRight, ChevronLeft,
+    ChevronRight, ChevronLeft, Image as ImageIcon,
+    Layout
 } from 'lucide-react';
 import { PageBreak } from './PageBreakExtension';
 import { cn } from '@/lib/utils';
@@ -62,7 +64,7 @@ export function RichTextEditor({
             Highlight.configure({ multicolor: false }),
             Subscript,
             Superscript,
-            TextAlign.configure({ types: ['heading', 'paragraph'] }),
+            TextAlign.configure({ types: ['heading', 'paragraph', 'image'] }),
             Table.configure({
                 resizable: true,
                 HTMLAttributes: {
@@ -73,6 +75,13 @@ export function RichTextEditor({
             TableCell,
             TableHeader,
             PageBreak,
+            Image.configure({
+                // @ts-ignore - resize is available in v3.0+
+                resize: true,
+                HTMLAttributes: {
+                    class: 'rounded-lg border border-stone-200 shadow-sm max-w-full h-auto my-4',
+                },
+            }),
         ],
         content: value,
         editable: !disabled,
@@ -126,6 +135,22 @@ export function RichTextEditor({
         editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
         setShowTableMenu(false);
     }, [editor]);
+
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file && editor) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                const base64 = reader.result as string;
+                editor.chain().focus().setImage({ src: base64 }).run();
+            };
+            reader.readAsDataURL(file);
+        }
+        // Reset input
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
 
     if (!editor) return null;
 
@@ -210,6 +235,25 @@ export function RichTextEditor({
                         <ToolbarBtn onClick={() => editor.chain().focus().setPageBreak().run()} disabled={disabled} title="Page Break">
                             <Scissors size={14} />
                         </ToolbarBtn>
+                        <Sep />
+                        <label className="cursor-pointer">
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                className="hidden"
+                                accept="image/*"
+                                onChange={handleImageUpload}
+                                disabled={disabled}
+                            />
+                            <ToolbarBtn
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={disabled}
+                                title="Insert Image"
+                                active={false}
+                            >
+                                <ImageIcon size={14} />
+                            </ToolbarBtn>
+                        </label>
                     </>
                 )}
 
@@ -357,6 +401,42 @@ export function RichTextEditor({
                 </div>
             )}
 
+            {/* ─── Image Context Toolbar (visible when an image is selected) ── */}
+            {editor.isActive('image') && (
+                <div className="flex flex-wrap items-center gap-0.5 px-2 py-1 border-b border-blue-100 bg-blue-50/50">
+                    <span className="text-[10px] font-semibold text-blue-700 uppercase tracking-wider mr-2 uppercase">Image</span>
+                    <ToolbarBtn
+                        onClick={() => editor.chain().focus().setTextAlign('left').run()}
+                        active={editor.isActive({ textAlign: 'left' })}
+                        title="Align Left"
+                    >
+                        <AlignLeft size={12} />
+                    </ToolbarBtn>
+                    <ToolbarBtn
+                        onClick={() => editor.chain().focus().setTextAlign('center').run()}
+                        active={editor.isActive({ textAlign: 'center' })}
+                        title="Align Center"
+                    >
+                        <AlignCenter size={12} />
+                    </ToolbarBtn>
+                    <ToolbarBtn
+                        onClick={() => editor.chain().focus().setTextAlign('right').run()}
+                        active={editor.isActive({ textAlign: 'right' })}
+                        title="Align Right"
+                    >
+                        <AlignRight size={12} />
+                    </ToolbarBtn>
+                    <Sep />
+                    <ToolbarBtn
+                        onClick={() => editor.chain().focus().deleteSelection().run()}
+                        title="Delete Image"
+                        className="text-red-500 hover:text-red-700"
+                    >
+                        <Trash2 size={12} />
+                    </ToolbarBtn>
+                </div>
+            )}
+
             {/* ─── Editor Area ──────────────────────────────────────── */}
             <div
                 className="overflow-y-auto cursor-text rte-editor-area"
@@ -367,6 +447,29 @@ export function RichTextEditor({
             </div>
 
             <style>{`
+                /* Image Resize Handles */
+                .ProseMirror .image-resizer {
+                    display: inline-block;
+                    line-height: 0;
+                    position: relative;
+                }
+                .ProseMirror .image-resizer .image-resizer__handler {
+                    position: absolute;
+                    width: 10px;
+                    height: 10px;
+                    background: #10b981;
+                    border: 1px solid white;
+                    z-index: 100;
+                }
+                .ProseMirror .image-resizer .image-resizer__handler--top-left { top: -5px; left: -5px; cursor: nw-resize; }
+                .ProseMirror .image-resizer .image-resizer__handler--top-right { top: -5px; right: -5px; cursor: ne-resize; }
+                .ProseMirror .image-resizer .image-resizer__handler--bottom-left { bottom: -5px; left: -5px; cursor: sw-resize; }
+                .ProseMirror .image-resizer .image-resizer__handler--bottom-right { bottom: -5px; right: -5px; cursor: se-resize; }
+                
+                .ProseMirror img.ProseMirror-selectednode {
+                    outline: 3px solid #10b981;
+                }
+
                 /* Override Tailwind prose table resets */
                 .rte-editor-area .ProseMirror table,
                 .rte-editor-area .tiptap table {

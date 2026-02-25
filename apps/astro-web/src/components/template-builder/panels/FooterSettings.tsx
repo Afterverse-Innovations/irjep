@@ -22,7 +22,7 @@ export function FooterSettings({ config, onChange }: Props) {
                     placeholder="e.g. {{journalName}}"
                 />
                 <div className="flex flex-wrap gap-1 mt-1">
-                    {AVAILABLE_TOKENS.slice(0, 4).map((t) => (
+                    {AVAILABLE_TOKENS.slice(0, 8).map((t) => (
                         <button
                             key={t.key}
                             onClick={() => onChange({ leftContent: config.leftContent + t.key })}
@@ -45,7 +45,7 @@ export function FooterSettings({ config, onChange }: Props) {
                     placeholder="e.g. {{year}}"
                 />
                 <div className="flex flex-wrap gap-1 mt-1">
-                    {AVAILABLE_TOKENS.slice(0, 4).map((t) => (
+                    {AVAILABLE_TOKENS.slice(0, 8).map((t) => (
                         <button
                             key={t.key}
                             onClick={() => onChange({ rightContent: config.rightContent + t.key })}
@@ -77,8 +77,8 @@ export function FooterSettings({ config, onChange }: Props) {
                                 key={p}
                                 onClick={() => onChange({ pageNumberPosition: p })}
                                 className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors ${config.pageNumberPosition === p
-                                        ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
-                                        : "bg-stone-50 text-stone-500 hover:bg-stone-100"
+                                    ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
+                                    : "bg-stone-50 text-stone-500 hover:bg-stone-100"
                                     }`}
                             >
                                 {p.charAt(0).toUpperCase() + p.slice(1)}

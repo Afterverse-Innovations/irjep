@@ -73,6 +73,7 @@ function PaperEditorInner({ paperId }: PaperEditorProps) {
         if (!Array.isArray(raw.tables)) raw.tables = [];
         if (!Array.isArray(raw.keywords)) raw.keywords = [];
         if (!Array.isArray(raw.authors)) raw.authors = [];
+        if (!raw.meta) raw.meta = {};
         setEditData(raw);
         setMode("edit");
     };
@@ -138,6 +139,12 @@ function PaperEditorInner({ paperId }: PaperEditorProps) {
         const newBody = [...editData.body];
         [newBody[index], newBody[index + 1]] = [newBody[index + 1], newBody[index]];
         setEditData({ ...editData, body: newBody });
+    };
+
+    // ─── Meta Helpers ─────────────────────────────────────────
+    const updateMeta = (updates: Partial<StructuredPaperData["meta"]>) => {
+        if (!editData) return;
+        setEditData({ ...editData, meta: { ...editData.meta, ...updates } });
     };
 
     // ─── Reference Helpers ────────────────────────────────────
@@ -447,6 +454,30 @@ function PaperEditorInner({ paperId }: PaperEditorProps) {
                             {/* ─── Metadata Tab ────────────────────── */}
                             {editTab === "metadata" && (
                                 <>
+                                    {/* Publication Info */}
+                                    <div className="grid grid-cols-2 gap-4 pb-4 border-b border-stone-100">
+                                        <div>
+                                            <label className="block text-xs font-medium text-stone-600 mb-1">Article Type</label>
+                                            <input
+                                                type="text"
+                                                value={editData.meta.articleType || ""}
+                                                onChange={(e) => updateMeta({ articleType: e.target.value })}
+                                                className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm"
+                                                placeholder="e.g. Research Article, Review..."
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-stone-600 mb-1">DOI</label>
+                                            <input
+                                                type="text"
+                                                value={editData.meta.doi || ""}
+                                                onChange={(e) => updateMeta({ doi: e.target.value })}
+                                                className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm"
+                                                placeholder="e.g. 10.1234/irjep.2024.123"
+                                            />
+                                        </div>
+                                    </div>
+
                                     {/* Contributor Particulars */}
                                     <div>
                                         <div className="flex items-center justify-between mb-2">

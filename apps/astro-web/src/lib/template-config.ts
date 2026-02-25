@@ -91,15 +91,15 @@ export interface LayoutConfig {
     columnGap: number;              // mm
     abstractFullWidth: boolean;
     titleFullWidth: boolean;
-}
-
-export interface HeaderTokenBlock {
-    tokens: string[];
-    alignment: "left" | "center" | "right";
+    showTitleSeparator: boolean;     // New
+    titleSeparatorColor: string;     // New
+    titleSeparatorThickness: number; // New (mm)
+    showMetaHeader: boolean;        // New (DOI/Type above title)
 }
 
 export interface HeaderConfig {
-    blocks: HeaderTokenBlock[];
+    leftContent: string;
+    rightContent: string;
     borderBottom: boolean;
     borderColor: string;
     paddingBottom: number;          // mm
@@ -125,6 +125,8 @@ export interface TableConfig {
     borderColor: string;
     headerBackgroundColor: string;
     headerTextColor: string;
+    lastRowBackgroundColor: string; // New
+    lastRowFontColor: string;       // New
     captionPrefix: string;
     captionItalic: boolean;
     preventBreak: boolean;
@@ -134,6 +136,7 @@ export interface ReferenceConfig {
     numberingStyle: "numbered" | "apa" | "mla" | "chicago";
     hangingIndent: number;          // mm
     autoNumbering: boolean;
+    numberingColor: string;         // New
 }
 
 export interface NumberingConfig {
@@ -183,6 +186,8 @@ export const AVAILABLE_TOKENS = [
     { key: "{{journalName}}", label: "Journal Name" },
     { key: "{{year}}", label: "Year" },
     { key: "{{doi}}", label: "DOI" },
+    { key: "{{articleTitle}}", label: "Article Title" },
+    { key: "{{firstAuthor}}", label: "First Author" },
     { key: "{{sectionName}}", label: "Section Name" },
     { key: "{{pageNumber}}", label: "Page Number" },
     { key: "{{volume}}", label: "Volume" },

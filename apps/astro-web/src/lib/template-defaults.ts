@@ -88,13 +88,15 @@ export const DEFAULT_TEMPLATE_CONFIG: JournalTemplateConfig = {
         columnGap: 6,
         abstractFullWidth: false,
         titleFullWidth: true,
+        showTitleSeparator: true,
+        titleSeparatorColor: "#0000ff", // Blue
+        titleSeparatorThickness: 1,      // 1mm
+        showMetaHeader: true,
     },
 
     header: {
-        blocks: [
-            { tokens: ["{{journalName}}"], alignment: "left" },
-            { tokens: ["Vol. {{volume}}, Issue {{issue}}, {{year}}"], alignment: "right" },
-        ],
+        leftContent: "{{journalName}}",
+        rightContent: "Vol. {{volume}}, Issue {{issue}}, {{year}}",
         borderBottom: true,
         borderColor: "#cccccc",
         paddingBottom: 3,
@@ -120,6 +122,8 @@ export const DEFAULT_TEMPLATE_CONFIG: JournalTemplateConfig = {
         borderColor: "#000000",
         headerBackgroundColor: "#f5f5f5",
         headerTextColor: "#000000",
+        lastRowBackgroundColor: "transparent",
+        lastRowFontColor: "#000000",
         captionPrefix: "Table",
         captionItalic: false,
         preventBreak: true,
@@ -129,6 +133,7 @@ export const DEFAULT_TEMPLATE_CONFIG: JournalTemplateConfig = {
         numberingStyle: "numbered",
         hangingIndent: 8,
         autoNumbering: true,
+        numberingColor: "#000000",
     },
 
     numbering: {
@@ -149,7 +154,7 @@ export const DEFAULT_TEMPLATE_CONFIG: JournalTemplateConfig = {
     },
 
     tokens: {
-        journalName: "International Research Journal of Education and Practice",
+        journalName: "International Research Journal of Ethnomedicine and Practices",
         journalAbbreviation: "IRJEP",
         issn: "",
     },
