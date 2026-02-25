@@ -103,7 +103,7 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
             <div className="paper-authors">
                 {data.authors.map((a, i) => (
                     <span key={i}>
-                        {a.name}{a.isCorresponding && <sup>*</sup>}
+                        {a.name.toUpperCase()}<sup>{i + 1}{a.isCorresponding && "*"}</sup>
                         {i < data.authors.length - 1 && ", "}
                     </span>
                 ))}

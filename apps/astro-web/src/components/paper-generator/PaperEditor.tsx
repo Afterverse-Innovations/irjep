@@ -309,6 +309,25 @@ function PaperEditorInner({ paperId }: PaperEditorProps) {
                                         />
                                     </div>
 
+                                    {/* Authors */}
+                                    <div>
+                                        <label className="block text-xs font-medium text-stone-600 mb-1">Authors (comma-separated)</label>
+                                        <input
+                                            type="text"
+                                            value={editData.authors.map(a => a.name).join(", ")}
+                                            onChange={(e) => {
+                                                const names = e.target.value.split(",").map(n => n.trim()).filter(Boolean);
+                                                const newAuthors = names.map(name => {
+                                                    const existing = editData.authors.find(a => a.name === name);
+                                                    return existing ?? { name, affiliation: "", isCorresponding: false };
+                                                });
+                                                setEditData({ ...editData, authors: newAuthors });
+                                            }}
+                                            className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm"
+                                            placeholder="Author One, Author Two, Author Three"
+                                        />
+                                    </div>
+
                                     {/* Abstract */}
                                     <div>
                                         <label className="block text-xs font-medium text-stone-600 mb-1">Abstract</label>
