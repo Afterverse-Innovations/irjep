@@ -48,6 +48,7 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
     const [bodyCapacityN, setBodyCapacityN] = useState(0); // page 2+
     const [bodySingleColH, setBodySingleColH] = useState(0);
     const [endMatterH, setEndMatterH] = useState(0);
+    const [endMatterOnSeparatePage, setEndMatterOnSeparatePage] = useState(false);
     const [measureTick, setMeasureTick] = useState(0);
     const tickRef = useRef(0);
 
@@ -267,7 +268,7 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
                 </div>
             </div>
         );
-    }, [endMatter, config.sections.bodyText, config.global]);
+    }, [endMatter, config.sections.metadata, config.global]);
 
     // ─── Measure & paginate ──────────────────────────────────
     useEffect(() => {
@@ -291,6 +292,9 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
             const cap1 = Math.max(0, totalInner - headerH - titleBlockH - bodyGapPx - footerH);
             const capN = Math.max(0, totalInner - headerH - bodyGapPx - footerH);
 
+            // If end matter > threshold % of usable content area, force it to a separate page
+            const forceEmSeparate = emH > capN * (config.endMatter?.separatePageThreshold ?? 0.5);
+
             // Sequential pagination to account for spanning end-matter
             let pages = 1;
             let currentRemaining = bodyH;
@@ -300,8 +304,8 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
             if (currentRemaining <= p1Capacity) {
                 // Fits on page 1, but does endMatter fit?
                 const usedH = titleBlockH + bodyGapPx + (currentRemaining / colCount) + emH;
-                if (usedH > totalInner - headerH - footerH) {
-                    pages = 2; // EndMatter spills to page 2
+                if (forceEmSeparate || usedH > totalInner - headerH - footerH) {
+                    pages = 2; // EndMatter goes to page 2
                 } else {
                     pages = 1;
                 }
@@ -314,7 +318,7 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
                     if (currentRemaining <= pNCapacity) {
                         // Body fits on this page, but check endMatter
                         const usedH = (currentRemaining / colCount) + emH;
-                        if (usedH > capN) {
+                        if (forceEmSeparate || usedH > capN) {
                             // endMatter spills to next page
                             pages++;
                         }
@@ -329,6 +333,7 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
             setBodyCapacityN(capN);
             setBodySingleColH(bodyH);
             setEndMatterH(emH);
+            setEndMatterOnSeparatePage(forceEmSeparate);
             setPageCount(pages);
         }, 150);
     }, [data, config, pageDims, colCount, bodyStreamJSX, titleBlockJSX, endMatterJSX, measureTick]);
@@ -421,8 +426,10 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
                             </div>
 
                             {/* Spanning End Matter - outside columns */}
+                            {/* If endMatter is on a separate page, only show it on the very last page (no body content) */}
+                            {/* Otherwise show it on the last page with body */}
                             {pageIdx === pageCount - 1 && (
-                                <div className="paper-end-wrapper" ref={pageIdx === 0 ? measureEndMatterRef : undefined}>
+                                <div className="paper-end-wrapper">
                                     {endMatterJSX}
                                 </div>
                             )}

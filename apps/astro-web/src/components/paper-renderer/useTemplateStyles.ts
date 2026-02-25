@@ -57,8 +57,10 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
   const body = resolveStyle(g, sec.bodyText);
   const refs = resolveStyle(g, sec.references);
   const tables = resolveStyle(g, sec.tables);
+  const metadata = resolveStyle(g, sec.metadata);
   const hdr = resolveStyle(g, sec.header);
   const ftr = resolveStyle(g, sec.footer);
+  const em = config.endMatter || {} as any;
 
   const pageSize = PAGE_SIZES[page.size] ?? PAGE_SIZES.A4;
   const isLandscape = page.orientation === "landscape";
@@ -411,16 +413,14 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
 
 /* ─── End-Matter ───────────────────────────────────────────── */
 .paper-endmatter {
-  margin-top: ${spacing.betweenSections}mm;
-  padding-top: ${spacing.betweenSections}mm;
-  border-top: 1px solid #ccc;
-  font-size: ${body.fontSize - 1}pt;
+  ${fontStyle(metadata)}
+  ${em.showBorderTop !== false ? `border-top: 1px solid ${em.borderColor || '#ccc'};` : ''}
 }
 .paper-endmatter-section { margin-bottom: ${spacing.betweenSections * 0.6}mm; }
 .paper-endmatter-heading {
   font-weight: bold;
-  font-size: ${body.fontSize - 1}pt;
-  text-transform: uppercase;
+  font-size: ${metadata.fontSize}pt;
+  ${em.headingUppercase !== false ? 'text-transform: uppercase;' : ''}
   margin-bottom: 1.5mm;
 }
 .paper-endmatter-item { margin-bottom: 1mm; padding-left: 2mm; }
@@ -429,7 +429,7 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5mm;
-  font-size: ${body.fontSize - 1}pt;
+  font-size: ${metadata.fontSize}pt;
 }
 `;
 }

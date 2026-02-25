@@ -77,7 +77,7 @@ export function SectionStyleEditor({
     showLineHeight = false,
     fontSizeRange = [6, 28],
 }: Props) {
-    const sz = override.fontSize ?? resolved.fontSize;
+    const sz = override?.fontSize ?? resolved.fontSize;
 
     return (
         <div className="space-y-3">
@@ -219,7 +219,6 @@ export function SectionStyleEditor({
                     </button>
                 )}
             </div>
-
             {/* Margin */}
             <BoxInput
                 label="Margin (mm)"

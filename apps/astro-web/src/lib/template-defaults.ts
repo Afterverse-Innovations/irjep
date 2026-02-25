@@ -81,6 +81,11 @@ export const DEFAULT_TEMPLATE_CONFIG: JournalTemplateConfig = {
             fontSize: 8,
             fontColor: "#555555",
         },
+        metadata: {
+            fontSize: 9,
+            margin: { top: 8, right: 0, bottom: 0, left: 0 },
+            padding: { top: 8, right: 0, bottom: 0, left: 0 },
+        },
     },
 
     layout: {
@@ -151,6 +156,13 @@ export const DEFAULT_TEMPLATE_CONFIG: JournalTemplateConfig = {
     printRules: {
         pageBreakBeforeSections: false,
         avoidBreakInsideParagraphs: true,
+    },
+
+    endMatter: {
+        showBorderTop: true,
+        borderColor: "#cccccc",
+        headingUppercase: true,
+        separatePageThreshold: 0.5,
     },
 
     tokens: {

@@ -56,6 +56,7 @@ export const SECTION_KEYS = [
     "bodyText",
     "references",
     "tables",
+    "metadata",
     "header",
     "footer",
 ] as const;
@@ -72,6 +73,7 @@ export const SECTION_LABELS: Record<SectionKey, string> = {
     bodyText: "Body Text",
     references: "References",
     tables: "Tables",
+    metadata: "Metadata (End Matter)",
     header: "Header",
     footer: "Footer",
 };
@@ -151,6 +153,13 @@ export interface SpacingConfig {
     afterHeading: number;           // mm
 }
 
+export interface EndMatterConfig {
+    showBorderTop: boolean;
+    borderColor: string;
+    headingUppercase: boolean;
+    separatePageThreshold: number;  // 0–1 fraction of page content area
+}
+
 export interface PrintRulesConfig {
     pageBreakBeforeSections: boolean;
     avoidBreakInsideParagraphs: boolean;
@@ -176,6 +185,7 @@ export interface JournalTemplateConfig {
     reference: ReferenceConfig;
     numbering: NumberingConfig;
     spacing: SpacingConfig;
+    endMatter: EndMatterConfig;
     printRules: PrintRulesConfig;
     tokens: TokenConfig;
 }

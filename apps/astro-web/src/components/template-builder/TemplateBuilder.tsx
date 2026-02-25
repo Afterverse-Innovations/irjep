@@ -20,6 +20,7 @@ import { FooterSettings } from "./panels/FooterSettings";
 import { TableSettings } from "./panels/TableSettings";
 import { ReferenceSettings } from "./panels/ReferenceSettings";
 import { NumberingSettings } from "./panels/NumberingSettings";
+import { EndMatterSettings } from "./panels/EndMatterSettings";
 import { withConvex } from "@/components/ConvexClientProvider";
 
 // Sample data for live preview while building templates
@@ -103,6 +104,7 @@ const TABS = [
     { id: "table", label: "Tables", icon: Table },
     { id: "reference", label: "References", icon: BookOpen },
     { id: "numbering", label: "Numbering", icon: Hash },
+    { id: "metadata", label: "Metadata", icon: Layers },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -164,9 +166,13 @@ function TemplateBuilderInner({ templateId }: TemplateBuilderProps) {
             const configWithMigration = {
                 ...DEFAULT_TEMPLATE_CONFIG,
                 ...loadedConfig,
-                sections: loadedConfig.sections ?? DEFAULT_TEMPLATE_CONFIG.sections,
+                sections: {
+                    ...DEFAULT_TEMPLATE_CONFIG.sections,
+                    ...(loadedConfig.sections || {}),
+                },
                 global: loadedConfig.global ?? DEFAULT_TEMPLATE_CONFIG.global,
                 abstractLabel: loadedConfig.abstractLabel ?? loadedConfig.abstract ?? DEFAULT_TEMPLATE_CONFIG.abstractLabel,
+                endMatter: loadedConfig.endMatter ?? DEFAULT_TEMPLATE_CONFIG.endMatter,
             };
 
             // Migrate old header blocks to new fields
@@ -473,6 +479,7 @@ function TemplateBuilderInner({ templateId }: TemplateBuilderProps) {
                         {activeTab === "table" && <TableSettings config={config.table} onChange={(v) => updateConfig("table", v)} />}
                         {activeTab === "reference" && <ReferenceSettings config={config.reference} onChange={(v) => updateConfig("reference", v)} />}
                         {activeTab === "numbering" && <NumberingSettings config={config.numbering} onChange={(v) => updateConfig("numbering", v)} />}
+                        {activeTab === "metadata" && <EndMatterSettings config={config.endMatter} onChange={(v) => updateConfig("endMatter", v)} />}
                     </div>
                 </div>
 
