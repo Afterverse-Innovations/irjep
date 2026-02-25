@@ -122,7 +122,10 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
                     <span>{data.meta.articleType || "Article"}</span>
                 </div>
             )}
-            <div className="paper-title">{data.title || "Untitled Paper"}</div>
+            <div className="paper-title-container">
+                <img src="/logo.png" className="paper-logo" alt="Journal Logo" />
+                <div className="paper-title">{data.title || "Untitled Paper"}</div>
+            </div>
             <div className="paper-authors">
                 {data.authors.map((a, i) => (
                     <span key={i}>
@@ -219,6 +222,7 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
         if (!endMatter) return null;
         return (
             <div key="endmatter" className="paper-endmatter">
+                {/* 1. Particulars (Full Width) */}
                 {endMatter.contributorParticulars.length > 0 && (
                     <div className="paper-endmatter-section">
                         <div className="paper-endmatter-heading">Particulars of Contributors:</div>
@@ -227,44 +231,44 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
                         ))}
                     </div>
                 )}
-                {endMatter.correspondingAuthor.name && (
+
+                {/* 2. Middle Row: 3-column grid */}
+                <div className="paper-endmatter-row-3">
+                    {/* Col 1: Corresponding Author */}
                     <div className="paper-endmatter-section">
                         <div className="paper-endmatter-heading">Name, Address, E-mail ID of the Corresponding Author:</div>
                         <div className="paper-endmatter-item">{endMatter.correspondingAuthor.name}</div>
                         {endMatter.correspondingAuthor.address && <div className="paper-endmatter-item">{endMatter.correspondingAuthor.address}</div>}
                         {endMatter.correspondingAuthor.email && <div className="paper-endmatter-item">Email: {endMatter.correspondingAuthor.email}</div>}
                     </div>
-                )}
-                <div className="paper-endmatter-section">
-                    <div className="paper-endmatter-heading">Author Declaration:</div>
-                    <div className="paper-endmatter-item">• Financial or Other Competing Interests: {endMatter.authorDeclaration.competingInterests || "None"}</div>
-                    {endMatter.authorDeclaration.ethicsApproval && <div className="paper-endmatter-item">• Was Ethics Committee Approval obtained? {endMatter.authorDeclaration.ethicsApproval}</div>}
-                    {endMatter.authorDeclaration.informedConsent && <div className="paper-endmatter-item">• Was informed consent obtained? {endMatter.authorDeclaration.informedConsent}</div>}
-                </div>
-                {endMatter.plagiarismChecking.checkerEntries.length > 0 && (
-                    <div className="paper-endmatter-section">
-                        <div className="paper-endmatter-heading">Plagiarism Checking Methods:</div>
-                        {endMatter.plagiarismChecking.checkerEntries.map((entry, i) => (
-                            <div key={i} className="paper-endmatter-item">• {entry.method}: {entry.date}</div>
-                        ))}
-                    </div>
-                )}
-                {endMatter.pharmacology && (
-                    <div className="paper-endmatter-section">
+
+                    {/* Col 3: Pharmacology & Emendations */}
+                    <div className="paper-endmatter-section text-right">
                         <div className="paper-endmatter-heading">Pharmacology:</div>
-                        <div className="paper-endmatter-item">{endMatter.pharmacology}</div>
+                        <div className="paper-endmatter-item">{endMatter.pharmacology || "Author Origin"}</div>
+
+                        <div className="paper-endmatter-heading mt-2">Emendations: {endMatter.emendations || "0"}</div>
                     </div>
-                )}
-                {endMatter.emendations && (
+                </div>
+
+                {/* 3. Bottom Row: 2-column grid */}
+                <div className="paper-endmatter-row-2">
+                    {/* Col 1: Author Declaration */}
                     <div className="paper-endmatter-section">
-                        <div className="paper-endmatter-heading">Emendations: {endMatter.emendations}</div>
+                        <div className="paper-endmatter-heading">Author Declaration:</div>
+                        <div className="paper-endmatter-item">• Financial or Other Competing Interests: {endMatter.authorDeclaration.competingInterests || "None"}</div>
+                        {endMatter.authorDeclaration.ethicsApproval && <div className="paper-endmatter-item">• Was Ethics Committee Approval obtained for this study? {endMatter.authorDeclaration.ethicsApproval}</div>}
+                        {endMatter.authorDeclaration.informedConsent && <div className="paper-endmatter-item">• Was informed consent obtained from the subjects involved in the study? {endMatter.authorDeclaration.informedConsent}</div>}
+                        {endMatter.plagiarismChecking.imageConsent && <div className="paper-endmatter-item">• For any images presented appropriate consent has been obtained: {endMatter.plagiarismChecking.imageConsent}</div>}
                     </div>
-                )}
-                <div className="paper-endmatter-dates">
-                    {endMatter.dateOfSubmission && <div>Date of Submission: {endMatter.dateOfSubmission}</div>}
-                    {endMatter.dateOfPeerReview && <div>Date of Peer Review: {endMatter.dateOfPeerReview}</div>}
-                    {endMatter.dateOfAcceptance && <div>Date of Acceptance: {endMatter.dateOfAcceptance}</div>}
-                    {endMatter.dateOfPublishing && <div>Date of Publishing: {endMatter.dateOfPublishing}</div>}
+
+                    {/* Col 2: Dates (Right Aligned) */}
+                    <div className="paper-endmatter-dates-vertical">
+                        {endMatter.dateOfSubmission && <div>Date of Submission: <span className="paper-bold-value">{endMatter.dateOfSubmission}</span></div>}
+                        {endMatter.dateOfPeerReview && <div>Date of Peer Review: <span className="paper-bold-value">{endMatter.dateOfPeerReview}</span></div>}
+                        {endMatter.dateOfAcceptance && <div>Date of Acceptance: <span className="paper-bold-value">{endMatter.dateOfAcceptance}</span></div>}
+                        {endMatter.dateOfPublishing && <div>Date of Publishing: <span className="paper-bold-value">{endMatter.dateOfPublishing}</span></div>}
+                    </div>
                 </div>
             </div>
         );
@@ -429,9 +433,12 @@ export function TemplateRenderer({ config, data, className = "" }: TemplateRende
                             {/* If endMatter is on a separate page, only show it on the very last page (no body content) */}
                             {/* Otherwise show it on the last page with body */}
                             {pageIdx === pageCount - 1 && (
-                                <div className="paper-end-wrapper">
-                                    {endMatterJSX}
-                                </div>
+                                <>
+                                    <div className="paper-endmatter-separator" />
+                                    <div className="paper-end-wrapper">
+                                        {endMatterJSX}
+                                    </div>
+                                </>
                             )}
 
                             {renderFooter(pageIdx + 1, pageCount)}

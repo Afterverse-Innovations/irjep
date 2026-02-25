@@ -161,8 +161,23 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
   letter-spacing: 0.5pt;
 }
 
+.paper-title-container {
+  display: flex;
+  align-items: start;
+  gap: 6mm;
+  margin-bottom: 2mm;
+}
+
+.paper-logo {
+  height: 16mm;
+  width: auto;
+  flex-shrink: 0;
+}
+
 .paper-title {
   ${fontStyle(title)}
+  margin: 0 !important;
+  flex: 1;
 }
 
 .paper-authors {
@@ -175,6 +190,12 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
     background-color: ${layout.titleSeparatorColor};
     margin: 0mm -15mm 0mm -15mm
   ` : "display: none;"}
+}
+
+.paper-endmatter-separator {
+  height: 1mm;
+  background-color: ${headings.fontColor};
+  margin-bottom: 2mm;
 }
 
 .paper-affiliations {
@@ -416,20 +437,46 @@ export function generateTemplateCSS(config: JournalTemplateConfig): string {
   ${fontStyle(metadata)}
   ${em.showBorderTop !== false ? `border-top: 1px solid ${em.borderColor || '#ccc'};` : ''}
 }
-.paper-endmatter-section { margin-bottom: ${spacing.betweenSections * 0.6}mm; }
+.paper-endmatter-section { margin-bottom: 1.5mm; }
 .paper-endmatter-heading {
   font-weight: bold;
   font-size: ${metadata.fontSize}pt;
   ${em.headingUppercase !== false ? 'text-transform: uppercase;' : ''}
-  margin-bottom: 1.5mm;
+  margin-bottom: 1mm;
 }
-.paper-endmatter-item { margin-bottom: 1mm; padding-left: 2mm; }
-.paper-endmatter-dates {
-  margin-top: ${spacing.betweenSections * 0.5}mm;
+.paper-endmatter-item { margin-bottom: 0.8mm; padding-left: 1mm; }
+
+.paper-endmatter-row-3 {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5mm;
-  font-size: ${metadata.fontSize}pt;
+  grid-template-columns: 3fr 3fr;
+  gap: 4mm;
+  align-items: start;
+  margin-bottom: 3mm;
 }
+.paper-endmatter-row-2 {
+  display: grid;
+  grid-template-columns: 2fr 1.2fr;
+  gap: 4mm;
+  align-items: center;
+  margin-top: 2mm;
+}
+.paper-endmatter-dates-vertical {
+  text-align: right;
+}
+.paper-endmatter-dates-vertical div {
+  margin-bottom: 0.5mm;
+  color: #555;
+}
+.paper-bold-value {
+  font-weight: bold;
+  color: #333;
+}
+.text-right { text-align: right; }
+.mt-2 { margin-top: 2mm; }
+.paper-end-wrapper {
+  border-radius: 2mm;
+  overflow: hidden;
+}
+
 `;
 }
